@@ -9,7 +9,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// [BARU] Logika Pelindung Serverless Vercel: Pulihkan session jika cookie login tersedia
+// Logika Pelindung Serverless Vercel: Pulihkan session jika cookie login tersedia
 if (!isset($_SESSION['login']) && isset($_COOKIE['user_login'])) {
     $_SESSION['login'] = true;
     $_SESSION['username'] = $_COOKIE['user_login'];
@@ -41,6 +41,7 @@ if ($menu == 'rekap') {
         $params[':cari3'] = "%$cari%";
     }
 
+    // Master Query Gabungan
     $query_gabungan = "
         SELECT * FROM (
             SELECT nomor_surat, 'Surat Sakit' AS jenis, nama_pasien AS subjek, nama_dokter, 'cetak_sakit.php' AS link, NULL AS file_upload FROM surat_sakit
@@ -62,8 +63,12 @@ if ($menu == 'rekap') {
         $total_pages = ceil($total_data / $limit);
         if ($total_pages < 1) $total_pages = 1;
 
-        // Query tampil dengan limit dan offset
-        $query_tampil = $query_gabungan . " ORDER BY nomor_surat DESC LIMIT :limit OFFSET :offset";
+        /**
+         * PERBAIKAN UTAMA DI SINI:
+         * split_part(nomor_surat, '/', 2) memotong teks berdasarkan '/' dan mengambil bagian ke-2 (nomor urut dokumen).
+         * CAST(... AS INTEGER) memaksa PostgreSQL mengurutkan secara angka matematis dari yang terbesar ke terkecil.
+         */
+        $query_tampil = $query_gabungan . " ORDER BY CAST(split_part(nomor_surat, '/', 2) AS INTEGER) DESC LIMIT :limit OFFSET :offset";
         $stmt_tampil = $koneksi->prepare($query_tampil);
         
         // Bind integer secara manual untuk LIMIT & OFFSET agar tidak error di PostgreSQL
@@ -144,7 +149,6 @@ if ($menu == 'rekap') {
 <div class="main-content">
 
     <?php if ($menu == 'rekap') : ?>
-        <!-- Bagian Rekap & Tabel Tetap Sama Aman -->
         <div class="header-section">
             <div>
                 <h2>Statistik &amp; Rekap Penomoran</h2>
