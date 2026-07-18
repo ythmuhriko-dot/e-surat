@@ -1,6 +1,15 @@
 <?php
+// Aktifkan output buffering untuk mencegah error "headers already sent" di serverless Vercel
+ob_start();
+
 include 'koneksi.php';
-session_start();
+
+// Memulai session dengan aman
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Cek status login
 if (!isset($_SESSION['login'])) {
     header("Location: login.php");
     exit();
@@ -16,7 +25,7 @@ if ($menu == 'rekap') {
 
     $cari = isset($_GET['cari']) ? trim($_GET['cari']) : '';
 
-    // Modifikasi penanganan klausa WHERE dan parameter array untuk PostgreSQL
+    // Penanganan klausa WHERE dan parameter array untuk PostgreSQL
     $where = "";
     $params = [];
     if ($cari != "") {
@@ -191,10 +200,10 @@ if ($menu == 'rekap') {
                         if ($row['jenis'] == 'Non-Pelayanan') {
                             echo "<a href='uploads/".htmlspecialchars($row['file_upload'])."' target='_blank'>📂 Buka</a> ";
                         } else {
-                            echo "<a href=''.htmlspecialchars($row['link']).'?nomor='.urlencode($row['nomor_surat']).'' target='_blank'>🖨️ Cetak</a> ";
+                            echo "<a href='".htmlspecialchars($row['link'])."?nomor=".urlencode($row['nomor_surat'])."' target='_blank'>🖨️ Cetak</a> ";
                         }
 
-                        echo "<a href='hapus_surat.php?nomor='.urlencode($row['nomor_surat']).'&jenis='.urlencode($row['jenis']).'' onclick=\"return confirm('Yakin ingin menghapus data ini?');\" style='color: red; margin-left: 10px;'>🗑️ Hapus</a>";
+                        echo "<a href='hapus_surat.php?nomor=".urlencode($row['nomor_surat'])."&jenis=".urlencode($row['jenis'])."' onclick=\"return confirm('Yakin ingin menghapus data ini?');\" style='color: red; margin-left: 10px;'>🗑️ Hapus</a>";
                         echo "</td></tr>";
                     } 
                     ?>
@@ -220,7 +229,7 @@ if ($menu == 'rekap') {
         <div class="card-box">
             <h1>Dashboard</h1>
             <div class="welcome-box">
-                <p>Selamat datang <strong><?php echo htmlspecialchars($_SESSION['username']); ?></strong> di sistem aplikasi E-Surat Puskesmas Bangkingan.</p>
+                <p>Selamat datang <strong><?php echo htmlspecialchars($_SESSION['username'] ?? 'Admin'); ?></strong> di sistem aplikasi E-Surat Puskesmas Bangkingan.</p>
             </div>
             <p style="margin-top:20px; color:#666;">Gunakan menu di samping untuk mengelola data surat atau melihat rekapitulasi data.</p>
         </div>
@@ -230,3 +239,7 @@ if ($menu == 'rekap') {
 
 </body>
 </html>
+<?php 
+// Akhiri dan kirimkan output buffer ke browser
+ob_end_flush(); 
+?>
