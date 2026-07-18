@@ -2,7 +2,7 @@
 // Ambil variabel dari Environment Variables di Vercel demi keamanan
 // Jika variabel di Vercel belum disetel, dia otomatis memakai string di sebelah kanan sebagai default (fallback)
 $host     = getenv('DB_HOST') ?: 'db.ervxtpptbgejbvwiohrd.supabase.co'; // Ganti dengan Host URI Supabase Anda
-$port     = getenv('DB_PORT') ?: '5432';
+$port     = getenv('DB_PORT') ?: '6543';
 $database = getenv('DB_NAME') ?: 'postgres';
 $user     = getenv('DB_USER') ?: 'postgres';
 $password = getenv('DB_PASSWORD') ?: '@26040Riko1'; // Ganti dengan password database Supabase Anda
