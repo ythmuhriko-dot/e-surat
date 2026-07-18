@@ -30,11 +30,18 @@ $query_master = "
     SELECT nomor_surat, 'Non-Pelayanan' AS jenis, perihal AS subjek, pj_surat AS nama_dokter, '' AS link, file_surat FROM surat_non_pelayanan
 ";
 
-$query_gabungan = "SELECT * FROM ($query_master) AS gabungan $where ORDER BY nomor_surat DESC";
+/**
+ * PERBAIKAN UTAMA:
+ * split_part(nomor_surat, '/', 2) digunakan untuk mengambil bagian nomor urut (contoh: 1873).
+ * CAST (... AS INTEGER) mengubah teks nomor tersebut menjadi angka agar urutannya matematis dan sempurna.
+ */
+$query_gabungan = "SELECT * FROM ($query_master) AS gabungan $where 
+                   ORDER BY CAST(split_part(nomor_surat, '/', 2) AS INTEGER) DESC";
 
-// Eksekusi Hitung Total dengan PDO
+// Eksekusi Hitung Total dengan PDO (Disederhanakan untuk menghindari duplikasi query ORDER BY yang berat)
 if ($cari != "") {
-    $stmt_total = $koneksi->prepare("SELECT COUNT(*) as total FROM ($query_gabungan) as sub");
+    $stmt_total = $koneksi->prepare("SELECT COUNT(*) as total FROM ($query_master) as sub 
+                                     WHERE nomor_surat ILIKE :cari OR subjek ILIKE :cari OR nama_dokter ILIKE :cari");
     $stmt_total->execute([':cari' => "%$cari%"]);
     $total_data = $stmt_total->fetch()['total'];
 } else {
