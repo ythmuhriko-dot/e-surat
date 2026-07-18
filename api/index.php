@@ -64,11 +64,19 @@ if ($menu == 'rekap') {
         if ($total_pages < 1) $total_pages = 1;
 
         /**
-         * PERBAIKAN UTAMA DI SINI:
-         * split_part(nomor_surat, '/', 2) memotong teks berdasarkan '/' dan mengambil bagian ke-2 (nomor urut dokumen).
-         * CAST(... AS INTEGER) memaksa PostgreSQL mengurutkan secara angka matematis dari yang terbesar ke terkecil.
+         * PERBAIKAN SINKRONISASI DI SINI:
+         * Menggunakan CASE WHEN dan perbandingan regex (~ '^[0-9]+$') 
+         * untuk memastikan PostgreSQL tidak memaksakan CAST string kosong menjadi integer.
          */
-        $query_tampil = $query_gabungan . " ORDER BY CAST(split_part(nomor_surat, '/', 2) AS INTEGER) DESC LIMIT :limit OFFSET :offset";
+        $query_tampil = $query_gabungan . " 
+            ORDER BY 
+                CASE 
+                    WHEN split_part(nomor_surat, '/', 2) ~ '^[0-9]+$' 
+                    THEN CAST(split_part(nomor_surat, '/', 2) AS INTEGER)
+                    ELSE 0 
+                END DESC 
+            LIMIT :limit OFFSET :offset";
+            
         $stmt_tampil = $koneksi->prepare($query_tampil);
         
         // Bind integer secara manual untuk LIMIT & OFFSET agar tidak error di PostgreSQL

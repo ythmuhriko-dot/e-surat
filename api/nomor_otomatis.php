@@ -1,65 +1,48 @@
 <?php
 include 'koneksi.php';
 
-// JALUR 1: SURAT PELAYANAN (MEDIS)
-function buat_nomor_surat_otomatis($tahun_pilihan = null) {
+function buat_nomor_surat_otomatis() {
     global $koneksi;
-    if ($tahun_pilihan == null || empty($tahun_pilihan)) { 
-        $tahun_pilihan = date('Y'); 
-    } else { 
-        $tahun_pilihan = date('Y', strtotime($tahun_pilihan)); 
-    }
     
-    // Menggunakan dialek PostgreSQL: SPLIT_PART dan RIGHT() diganti dengan LIKE / SUBSTRING
-    $query = "
-        SELECT MAX(CAST(SPLIT_PART(nomor_surat, '/', 2) AS INTEGER)) AS nomor_terbesar 
+    // Tahun dinamis mengikuti sistem berjalan
+    $tahun = date('Y');
+    
+    // Master query gabungan untuk mengambil porsi angka nomor surat saja dari semua jenis surat
+    // split_part(nomor_surat, '/', 2) memotong string berdasarkan '/' dan mengambil bagian kedua (counter nomor)
+    $query_max = "
+        SELECT MAX(CAST(split_part(nomor_surat, '/', 2) AS INTEGER)) as nomor_tertinggi
         FROM (
-            SELECT nomor_surat FROM surat_sakit WHERE nomor_surat LIKE :tahun1
+            SELECT nomor_surat FROM surat_sakit WHERE nomor_surat LIKE :tahun
             UNION ALL
-            SELECT nomor_surat FROM surat_sehat WHERE nomor_surat LIKE :tahun2
+            SELECT nomor_surat FROM surat_sehat WHERE nomor_surat LIKE :tahun
             UNION ALL
-            SELECT nomor_surat FROM surat_kematian WHERE nomor_surat LIKE :tahun3
+            SELECT nomor_surat FROM surat_kematian WHERE nomor_surat LIKE :tahun
+            UNION ALL
+            SELECT nomor_surat FROM surat_non_pelayanan WHERE nomor_surat LIKE :tahun
         ) AS gabungan_surat
     ";
     
     try {
-        $stmt = $koneksi->prepare($query);
-        $param_tahun = "%/" . $tahun_pilihan;
-        $stmt->execute([
-            ':tahun1' => $param_tahun,
-            ':tahun2' => $param_tahun,
-            ':tahun3' => $param_tahun
-        ]);
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt = $koneksi->prepare($query_max);
+        // Memastikan pencarian counter nomor di-filter hanya untuk tahun berjalan
+        $stmt->execute([':tahun' => "%/$tahun"]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
         
-        $nomor_urut = ($data && $data['nomor_terbesar'] != NULL) ? $data['nomor_terbesar'] + 1 : 1;
-        return "400.7.22.1/" . str_pad($nomor_urut, 4, "0", STR_PAD_LEFT) . "/436.7.2.3.55/" . $tahun_pilihan;
-    } catch (PDOException $e) {
-        return "400.7.22.1/0001/436.7.2.3.55/" . $tahun_pilihan;
-    }
-}
-
-// JALUR 2: SURAT NON-PELAYANAN (UMUM / ADMINISTRASI TATA USAHA)
-function buat_nomor_non_pelayanan_otomatis($tahun_pilihan = null) {
-    global $koneksi;
-    if ($tahun_pilihan == null || empty($tahun_pilihan)) { 
-        $tahun_pilihan = date('Y'); 
-    } else { 
-        $tahun_pilihan = date('Y', strtotime($tahun_pilihan)); 
-    }
-    
-    $query = "SELECT MAX(CAST(SPLIT_PART(nomor_surat, '/', 2) AS INTEGER)) AS nomor_terbesar 
-              FROM surat_non_pelayanan WHERE nomor_surat LIKE :tahun";
-              
-    try {
-        $stmt = $koneksi->prepare($query);
-        $stmt->execute([':tahun' => "%/" . $tahun_pilihan]);
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        // Jika data ditemukan, ambil nomor tertinggi lalu tambah 1. Jika kosong, mulai dari 1.
+        $nomor_terakhir = isset($row['nomor_tertinggi']) ? (int)$row['nomor_tertinggi'] : 0;
+        $nomor_baru_angka = $nomor_terakhir + 1;
         
-        $nomor_urut = ($data && $data['nomor_terbesar'] != NULL) ? $data['nomor_terbesar'] + 1 : 1;
-        return "100.1.1.1/" . str_pad($nomor_urut, 4, "0", STR_PAD_LEFT) . "/436.7.2.3.55/" . $tahun_pilihan;
+        // Format angka dengan padding 4 digit (misal: 1 -> 0001, 1873 -> 1873)
+        $nomor_baru_format = str_pad($nomor_baru_angka, 4, "0", STR_PAD_LEFT);
+        
+        // Susun kembali pola instansi Puskesmas Bangkingan secara utuh
+        $nomor_surat_final = "400.7.22.1/" . $nomor_baru_format . "/436.7.2.3.55/" . $tahun;
+        
+        return $nomor_surat_final;
+        
     } catch (PDOException $e) {
-        return "100.1.1.1/0001/436.7.2.3.55/" . $tahun_pilihan;
+        // Jika database bermasalah, kembalikan format default agar aplikasi tidak crash
+        return "400.7.22.1/0001/436.7.2.3.55/" . $tahun;
     }
 }
 ?>
