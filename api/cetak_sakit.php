@@ -1,7 +1,6 @@
 <?php
 include 'koneksi.php';
 
-// 1. Ambil parameter dan lakukan URIDecode secara eksplisit
 $nomor_raw = $_GET['nomor'] ?? $_GET['nomor_surat'] ?? '';
 $nomor_ambil = urldecode($nomor_raw); 
 
@@ -10,21 +9,18 @@ if (empty($nomor_ambil)) {
 }
 
 try {
-    // Menggunakan Prepared Statement PDO
     $query = "SELECT * FROM surat_sakit WHERE nomor_surat = :nomor";
     $stmt = $koneksi->prepare($query);
     $stmt->execute([':nomor' => $nomor_ambil]);
     $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$data) {
-        // Jika data kosong, beri tahu user secara visual daripada layar putih kosong
         die("<div style='padding:20px; font-family:Arial;'><h3>Data Tidak Ditemukan</h3>Surat dengan nomor <strong>" . htmlspecialchars($nomor_ambil) . "</strong> tidak terdaftar di database. <br><br><a href='index.php?menu=rekap'>Kembali ke Rekap</a></div>");
     }
 } catch (PDOException $e) {
     die("<div style='padding:20px; font-family:Arial; color:red;'>Gagal mengambil data database: " . $e->getMessage() . "</div>");
 }
 
-// Menghitung tanggal selesai otomatis
 $tanggal_mulai_raw = $data['tanggal_mulai'];
 $days_to_add = (int)$data['lama_istirahat'] - 1;
 $tanggal_selesai_raw = date('Y-m-d', strtotime($tanggal_mulai_raw . " + " . $days_to_add . " days"));
@@ -116,8 +112,13 @@ $tanggal_selesai = tgl_indo($tanggal_selesai_raw);
 
    <div class="footer-container">
         <div class="qrcode-box">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=<?php echo urlencode('https://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . $_SERVER['REQUEST_URI']); ?>" alt="QR Verification">
-            <p>E-Verifikasi Sah</p>
+            <?php 
+                $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+                $domainName = $_SERVER['HTTP_HOST'] ?? 'localhost';
+                $link_verifikasi = $protocol . $domainName . dirname($_SERVER['PHP_SELF']) . '/verifikasi.php?jenis=sakit&nomor=' . urlencode($data['nomor_surat'] ?? '');
+            ?>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=<?php echo urlencode($link_verifikasi); ?>" alt="QR Verification">
+            <p style="font-size: 12px; font-weight: bold; margin-top: 5px;">E-Verifikasi Sah</p>
         </div>
         <div class="ttd-box">
             <p>Surabaya, <?php echo htmlspecialchars($tanggal_buat_surat); ?></p>

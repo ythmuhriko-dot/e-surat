@@ -29,12 +29,18 @@ if (isset($_POST['import'])) {
         $gagal = 0;
 
         try {
-            // Siapkan Prepared Statements di luar loop untuk efisiensi
-            $stmt_sakit = $koneksi->prepare("INSERT INTO surat_sakit (nomor_surat, nama_pasien, jenis_kelamin, umur, alamat_domisili, pekerjaan, alasan_sakit, lama_istirahat, tanggal_mulai, tanggal_dibuat, nama_dokter, sip_dokter) VALUES (:nomor, :nama, '-', 0, '-', '-', '-', 0, '-', :tgl, :dokter, '-')");
+            // Siapkan Prepared Statements dengan nilai default yang ramah PostgreSQL (Supabase)
+            $stmt_sakit = $koneksi->prepare("INSERT INTO surat_sakit 
+                (nomor_surat, nama_pasien, jenis_kelamin, umur, alamat_domisili, pekerjaan, alasan_sakit, lama_istirahat, tanggal_mulai, tanggal_dibuat, nama_dokter, sip_dokter) 
+                VALUES (:nomor, :nama, '-', 0, '-', '-', '-', 0, NULL, :tgl, :dokter, '-')");
             
-            $stmt_sehat = $koneksi->prepare("INSERT INTO surat_sehat (nomor_surat, nama_pasien, jenis_kelamin, umur, pekerjaan, alamat_domisili, tensi, nadi, suhu, berat_badan, tinggi_badan, gol_darah, visus_kanan, visus_kiri, buta_warna, keperluan, tanggal_input, nama_dokter, sip_dokter) VALUES (:nomor, :nama, '-', 0, '-', '-', '-', 0, '-', 0, 0, '-', '-', '-', '-', '-', :tgl, :dokter, '-')");
+            $stmt_sehat = $koneksi->prepare("INSERT INTO surat_sehat 
+                (nomor_surat, nama_pasien, jenis_kelamin, umur, pekerjaan, alamat_domisili, tensi, nadi, suhu, berat_badan, tinggi_badan, gol_darah, visus_kanan, visus_kiri, buta_warna, keperluan, tanggal_input, nama_dokter, sip_dokter) 
+                VALUES (:nomor, :nama, '-', 0, '-', '-', '-', 0, '-', 0, 0, '-', '-', '-', '-', '-', :tgl, :dokter, '-')");
             
-            $stmt_kematian = $koneksi->prepare("INSERT INTO surat_kematian (nomor_surat, nama_jenazah, jenis_kelamin, umur, alamat_jenazah, hari_meninggal, tanggal_meninggal, jam_meninggal, tempat_meninggal, penyebab, nama_pelapor, hubungan_pelapor, tanggal_input, nama_dokter, sip_dokter) VALUES (:nomor, :nama, '-', 0, '-', '-', '-', '-', '-', '-', '-', '-', :tgl, :dokter, '-')");
+            $stmt_kematian = $koneksi->prepare("INSERT INTO surat_kematian 
+                (nomor_surat, nama_jenazah, jenis_kelamin, umur, alamat_jenazah, hari_meninggal, tanggal_meninggal, jam_meninggal, tempat_meninggal, penyebab, nama_pelapor, hubungan_pelapor, tanggal_input, nama_dokter, sip_dokter) 
+                VALUES (:nomor, :nama, '-', 0, '-', '-', '2026-01-01', '-', '-', '-', '-', '-', :tgl, :dokter, '-')");
 
             // Membaca data CSV baris demi baris secara dinamis
             while (($data = fgetcsv($handle, 1000, $delimiter)) !== FALSE) {
@@ -49,15 +55,18 @@ if (isset($_POST['import'])) {
                 $nama_subjek   = trim($data[3]);
                 $nama_dokter   = trim($data[4]);
 
+                // Konversi string tanggal kosong menjadi NULL agar tidak merusak kolom DATE
+                $tanggal_final = (!empty($tanggal_surat) && $tanggal_surat !== '-') ? $tanggal_surat : null;
+
                 $cek_jenis = strtolower($jenis_surat);
                 $simpan = false;
 
                 if ($cek_jenis == 'surat sakit') {
-                    $simpan = $stmt_sakit->execute([':nomor' => $nomor_surat, ':nama' => $nama_subjek, ':tgl' => $tanggal_surat, ':dokter' => $nama_dokter]);
+                    $simpan = $stmt_sakit->execute([':nomor' => $nomor_surat, ':nama' => $nama_subjek, ':tgl' => $tanggal_final, ':dokter' => $nama_dokter]);
                 } elseif ($cek_jenis == 'surat sehat') {
-                    $simpan = $stmt_sehat->execute([':nomor' => $nomor_surat, ':nama' => $nama_subjek, ':tgl' => $tanggal_surat, ':dokter' => $nama_dokter]);
+                    $simpan = $stmt_sehat->execute([':nomor' => $nomor_surat, ':nama' => $nama_subjek, ':tgl' => $tanggal_final, ':dokter' => $nama_dokter]);
                 } elseif ($cek_jenis == 'surat kematian') {
-                    $simpan = $stmt_kematian->execute([':nomor' => $nomor_surat, ':nama' => $nama_subjek, ':tgl' => $tanggal_surat, ':dokter' => $nama_dokter]);
+                    $simpan = $stmt_kematian->execute([':nomor' => $nomor_surat, ':nama' => $nama_subjek, ':tgl' => $tanggal_final, ':dokter' => $nama_dokter]);
                 } else {
                     continue;
                 }
@@ -70,7 +79,8 @@ if (isset($_POST['import'])) {
             }
         } catch (PDOException $e) {
             // Tangkap error database jika ada kendala tipe data
-            echo "<script>alert('Terjadi kesalahan database saat import: " . addslashes($e->getMessage()) . "');</script>";
+            echo "<script>alert('Terjadi kesalahan database saat import: " . addslashes($e->getMessage()) . "'); window.history.back();</script>";
+            exit();
         }
         
         fclose($handle);

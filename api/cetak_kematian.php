@@ -133,8 +133,13 @@ $tanggal_sekarang       = tgl_indo(date('Y-m-d'));
 
     <div class="footer-container">
         <div class="qrcode-box">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=<?php echo urlencode('https://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . $_SERVER['REQUEST_URI']); ?>" alt="QR">
-            <p>E-Verifikasi Sah</p>
+            <?php 
+                $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+                $domainName = $_SERVER['HTTP_HOST'] ?? 'localhost';
+                $link_verifikasi = $protocol . $domainName . dirname($_SERVER['PHP_SELF']) . '/verifikasi.php?jenis=kematian&nomor=' . urlencode($nomor_surat);
+            ?>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=<?php echo urlencode($link_verifikasi); ?>" alt="QR">
+            <p style="font-size: 12px; font-weight: bold; margin-top: 5px;">E-Verifikasi Sah</p>
         </div>
         <div class="ttd-box">
             <p>Surabaya, <?php echo htmlspecialchars($tanggal_sekarang); ?></p>
