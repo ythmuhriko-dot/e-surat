@@ -59,13 +59,16 @@ try {
         ':sip_dokter'        => $sip_dokter
     ]);
 
+    // ... [Kode bagian atas tetap sama] ...
+
     if ($simpan) {
         echo "<script>
                 alert('Data Surat Kematian Sesuai Format Word Berhasil Disimpan!');
-                window.location.href = 'cetak_kematian.php?nomor=" . urlencode($nomor_surat) . "';
+                window.location.href = 'cetak_kematian.php?nomor=' + encodeURIComponent('" . $nomor_surat . "');
               </script>";
     }
 } catch (PDOException $e) {
+// ... [Kode bagian bawah tetap sama] ...
     echo "Gagal menyimpan data ke Supabase: " . $e->getMessage();
 }
 ?>

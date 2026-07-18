@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($simpan) {
             echo "<script>
                     alert('Data Surat Sakit Sesuai Format Word Berhasil Disimpan!');
-                    window.location.href = 'cetak_sakit.php?nomor=" . urlencode($nomor_surat) . "';
+                    window.location.href = 'cetak_sakit.php?nomor=' + encodeURIComponent('" . $nomor_surat . "');
                   </script>";
         }
     } catch (PDOException $e) {

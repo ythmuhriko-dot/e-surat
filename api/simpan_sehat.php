@@ -66,13 +66,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             ':sip_dokter'    => $sip_dokter
         ]);
 
+        // ... [Kode bagian atas tetap sama] ...
+
         if ($simpan) {
             echo "<script>
                     alert('Data berhasil disimpan!');
-                    window.location.href = 'cetak_sehat.php?nomor=" . urlencode($nomor_surat) . "';
+                    window.location.href = 'cetak_sehat.php?nomor=' + encodeURIComponent('" . $nomor_surat . "');
                   </script>";
         }
     } catch (PDOException $e) {
+// ... [Kode bagian bawah tetap sama] ...
         echo "Gagal menyimpan data ke Supabase: " . $e->getMessage();
     }
 } 
