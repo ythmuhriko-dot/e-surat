@@ -9,6 +9,12 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// [BARU] Logika Pelindung Serverless Vercel: Pulihkan session jika cookie login tersedia
+if (!isset($_SESSION['login']) && isset($_COOKIE['user_login'])) {
+    $_SESSION['login'] = true;
+    $_SESSION['username'] = $_COOKIE['user_login'];
+}
+
 // Cek status login
 if (!isset($_SESSION['login'])) {
     header("Location: login.php");
@@ -138,6 +144,7 @@ if ($menu == 'rekap') {
 <div class="main-content">
 
     <?php if ($menu == 'rekap') : ?>
+        <!-- Bagian Rekap & Tabel Tetap Sama Aman -->
         <div class="header-section">
             <div>
                 <h2>Statistik &amp; Rekap Penomoran</h2>

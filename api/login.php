@@ -22,18 +22,21 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
-        .title-app { 
-            color: #475569; 
-            font-size: 20px; 
-            margin-bottom: 5px; 
-            text-transform: uppercase; 
-            letter-spacing: 1px; 
-        }
         h2 { 
             color: #1e293b; 
-            margin-bottom: 30px; 
+            margin-bottom: 25px; 
             font-weight: 600; 
             font-size: 20px; 
+        }
+        .error-message {
+            color: #ef4444; 
+            font-size: 14px; 
+            margin-bottom: 20px; 
+            font-weight: 500;
+            background-color: #fef2f2;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #fee2e2;
         }
         input {
             width: 100%;
@@ -63,6 +66,16 @@
 
 <div class="login-card">
     <h2>E-Surat Puskesmas Bangkingan</h2>
+    
+    <?php 
+    // Menampilkan pesan error jika URL mendeteksi parameter error=1
+    if (isset($_GET['error'])): 
+    ?>
+        <div class="error-message">
+            ❌ Username atau Password salah!
+        </div>
+    <?php endif; ?>
+
     <form action="proses_login.php" method="POST">
         <input type="text" name="username" placeholder="Username" required>
         <input type="password" name="password" placeholder="Password" required>
