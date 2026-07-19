@@ -101,7 +101,8 @@ if (!empty($nomor_ambil) && !empty($jenis)) {
                     <td class="label">Keperluan</td>
                     <td>: <?php echo htmlspecialchars($data_surat['keperluan'] ?? '-'); ?></td>
                 </tr>
-            <?php (($jenis === 'sakit')); ?>
+            <?php endif; ?>
+
             <?php if ($jenis === 'sakit'): ?>
                 <tr>
                     <td class="label">Lama Istirahat</td>
@@ -129,6 +130,17 @@ if (!empty($nomor_ambil) && !empty($jenis)) {
         </p>
     <?php endif; ?>
 </div>
+
+<!-- SCRIPT ALERT OTOMATIS SAAT DI-SCAN -->
+<script>
+    window.onload = function() {
+        <?php if ($terdaftar): ?>
+            alert("✅ Verifikasi Berhasil!\nDokumen ini ASLI & VALID terdaftar di UPTD Puskesmas Bangkingan.");
+        <?php else: ?>
+            alert("❌ Peringatan Keamanan!\nDokumen TIDAK VALID atau PALSU. Nomor surat tidak ditemukan dalam arsip digital.");
+        <?php endif; ?>
+    };
+</script>
 
 </body>
 </html>

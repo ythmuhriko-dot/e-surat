@@ -42,6 +42,11 @@ if (isset($_POST['import'])) {
                 (nomor_surat, nama_jenazah, jenis_kelamin, umur, alamat_jenazah, hari_meninggal, tanggal_meninggal, jam_meninggal, tempat_meninggal, penyebab, nama_pelapor, hubungan_pelapor, tanggal_input, nama_dokter, sip_dokter) 
                 VALUES (:nomor, :nama, '-', 0, '-', '-', '2026-01-01', '-', '-', '-', '-', '-', :tgl, :dokter, '-')");
 
+            // TAMBAHAN: Prepared Statement untuk Surat Non-Pelayanan
+            $stmt_non_pelayanan = $koneksi->prepare("INSERT INTO surat_non_pelayanan 
+                (nomor_surat, perihal, file_surat) 
+                VALUES (:nomor, :perihal, '-')");
+
             // Membaca data CSV baris demi baris secara dinamis
             while (($data = fgetcsv($handle, 1000, $delimiter)) !== FALSE) {
                 
@@ -52,7 +57,7 @@ if (isset($_POST['import'])) {
                 $jenis_surat   = trim($data[0]);
                 $tanggal_surat = trim($data[1]);
                 $nomor_surat   = trim($data[2]);
-                $nama_subjek   = trim($data[3]);
+                $nama_subjek   = trim($data[3]); // Untuk Non-Pelayanan ini akan menjadi 'Perihal'
                 $nama_dokter   = trim($data[4]);
 
                 // Konversi string tanggal kosong menjadi NULL agar tidak merusak kolom DATE
@@ -67,6 +72,9 @@ if (isset($_POST['import'])) {
                     $simpan = $stmt_sehat->execute([':nomor' => $nomor_surat, ':nama' => $nama_subjek, ':tgl' => $tanggal_final, ':dokter' => $nama_dokter]);
                 } elseif ($cek_jenis == 'surat kematian') {
                     $simpan = $stmt_kematian->execute([':nomor' => $nomor_surat, ':nama' => $nama_subjek, ':tgl' => $tanggal_final, ':dokter' => $nama_dokter]);
+                } elseif ($cek_jenis == 'non-pelayanan' || $cek_jenis == 'surat non pelayanan') {
+                    // Masuk ke tabel surat_non_pelayanan, kolom nama_subjek dipetakan sebagai perihal
+                    $simpan = $stmt_non_pelayanan->execute([':nomor' => $nomor_surat, ':perihal' => $nama_subjek]);
                 } else {
                     continue;
                 }
