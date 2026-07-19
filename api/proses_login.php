@@ -10,29 +10,29 @@ if (session_status() === PHP_SESSION_NONE) {
 include 'koneksi.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = $_POST['username'] ?? ''; //[cite: 3]
-    $password = $_POST['password'] ?? ''; //[cite: 3]
+    $username = $_POST['username'] ?? ''; 
+    $password = $_POST['password'] ?? ''; 
 
     try {
-        $query = "SELECT * FROM users WHERE username = :username AND password = :password"; //[cite: 3]
-        $stmt = $koneksi->prepare($query); //[cite: 3]
+        $query = "SELECT * FROM users WHERE username = :username AND password = :password"; 
+        $stmt = $koneksi->prepare($query); 
         $stmt->execute([
-            ':username' => $username, //[cite: 3]
-            ':password' => $password //[cite: 3]
+            ':username' => $username, 
+            ':password' => $password 
         ]);
         
-        $user = $stmt->fetch(PDO::FETCH_ASSOC); //[cite: 3]
+        $user = $stmt->fetch(PDO::FETCH_ASSOC); 
 
         if ($user) {
             // Pasang session dasar
-            $_SESSION['login'] = true; //[cite: 3]
-            $_SESSION['username'] = $username; //[cite: 3]
+            $_SESSION['login'] = true; 
+            $_SESSION['username'] = $username; 
             
             // [KUNCI SUKSES] Set Cookie login agar awet di lingkungan Serverless Vercel (aktif selama 1 hari)
             setcookie('user_login', $username, time() + (86400 * 1), "/");
             
-            // Redirect langsung via PHP header (tanpa echo script agar session tidak rusak)
-            header("Location: index.php");
+            // Redirect dengan membawa parameter sukses login
+            header("Location: index.php?login=success");
             exit();
         } else {
             // Jika gagal login, gunakan redirect PHP murni dan bawa status error
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             exit();
         }
     } catch (PDOException $e) {
-        die("Error Login: " . $e->getMessage()); //[cite: 3]
+        die("Error Login: " . $e->getMessage()); 
     }
 }
 ob_end_flush();

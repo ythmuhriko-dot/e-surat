@@ -256,6 +256,18 @@ if ($menu == 'rekap') {
 
 </div>
 
+<!-- PEMICU ALERT LOGIN BERHASIL -->
+<?php if (isset($_GET['login']) && $_GET['login'] == 'success'): ?>
+<script>
+    alert("Selamat! Anda berhasil login.");
+    
+    // Bersihkan URL parameter '?login=success' tanpa me-refresh halaman
+    if (window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.pathname);
+    }
+</script>
+<?php endif; ?>
+
 </body>
 </html>
 <?php 
