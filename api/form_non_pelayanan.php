@@ -1,6 +1,5 @@
 <?php 
-include 'nomor_otomatis.php'; 
-$nomor_surat_baru = buat_nomor_non_pelayanan_otomatis();
+// File nomor_otomatis.php tidak perlu di-include jika nomor dibuat manual
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -57,6 +56,7 @@ $nomor_surat_baru = buat_nomor_non_pelayanan_otomatis();
 
         <div class="form-group">
             <label>Nomor Surat:</label>
+            <!-- Diubah agar tidak ada readonly bawaan supaya tengahnya bisa langsung diedit -->
             <input type="text" name="nomor_surat" id="nomor_surat" class="form-control" style="font-weight: 600;" placeholder="Contoh: 400.7/0001/436.7.2.3.55/2026" required>
         </div>
 
@@ -264,49 +264,26 @@ $(document).ready(function() {
     });
 
     $('#nomor_surat').on('click focus', function(e) {
-        if (!$('#switch_backdate').is(':checked')) {
-            e.preventDefault();
-            aturBlokNomorUrut();
-        }
+        // Biarkan tetap bisa fokus dan nge-blok teks tengah secara otomatis
+        aturBlokNomorUrut();
     });
 });
 
 document.getElementById('switch_backdate').addEventListener('change', function() {
     var inputNomor = document.getElementById('nomor_surat');
     if (this.checked) {
-        inputNomor.removeAttribute('readonly');
         inputNomor.style.backgroundColor = '#fff3cd';
         inputNomor.focus();
     } else {
-        inputNomor.setAttribute('readonly', 'readonly');
         inputNomor.style.backgroundColor = '#ffffff';
-        
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'get_nomor_ajak.php?tanggal=' + document.getElementById('tanggal_surat').value + '&jenis=non_pelayanan', true);
-        xhr.onload = function() {
-            if (xhr.status === 200) { 
-                inputNomor.value = xhr.responseText; 
-                $('#kode_klasifikasi').trigger('change');
-            }
-        };
-        xhr.send();
+        $('#kode_klasifikasi').trigger('change');
     }
 });
 
 document.getElementById('tanggal_surat').addEventListener('change', function() {
     var switchBackdate = document.getElementById('switch_backdate');
-    var inputNomor = document.getElementById('nomor_surat');
-    
     if (!switchBackdate.checked) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'get_nomor_ajak.php?tanggal=' + this.value + '&jenis=non_pelayanan', true);
-        xhr.onload = function() {
-            if (xhr.status === 200) { 
-                inputNomor.value = xhr.responseText; 
-                $('#kode_klasifikasi').trigger('change');
-            }
-        };
-        xhr.send();
+        $('#kode_klasifikasi').trigger('change');
     }
 });
 </script>
