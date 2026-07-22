@@ -8,6 +8,14 @@
   ],
   "routes": [
     {
+      "src": "/logo_surabaya.png",
+      "dest": "/logo_surabaya.png"
+    },
+    {
+      "src": "/uploads/(.*)",
+      "dest": "/uploads/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/api/index.php"
     }
