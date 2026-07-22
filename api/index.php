@@ -1,4 +1,23 @@
 <?php
+// ==============================================================================
+// 1. ROUTER SERVERLESS VERCEL
+// Menangani pemanggilan file .php lain secara internal agar lolos limit 12 Lambda
+// ==============================================================================
+$request_uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$requested_file = basename($request_uri);
+
+if (!empty($requested_file) && $requested_file !== 'index.php') {
+    $target_file = __DIR__ . '/' . $requested_file;
+    if (file_exists($target_file) && is_file($target_file)) {
+        require $target_file;
+        exit();
+    }
+}
+
+// ==============================================================================
+// 2. LOGIKA DASHBOARD & REKAP (BAWAAN INDEX.PHP)
+// ==============================================================================
+
 // Aktifkan output buffering untuk mencegah error "headers already sent" di serverless Vercel
 ob_start();
 
