@@ -18,7 +18,7 @@ if (!empty($requested_file) && $requested_file !== 'index.php') {
 // 2. LOGIKA DASHBOARD & REKAP (BAWAAN INDEX.PHP)
 // ==============================================================================
 
-// Aktifkan output buffering untuk mencegah error "headers already sent" di serverless Vercel
+// Aktifkan output buffering untuk mencegah error "headers already sent"
 ob_start();
 
 include 'koneksi.php';
@@ -28,14 +28,14 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Logika Pelindung Serverless Vercel: Pulihkan session jika cookie login tersedia
-if (!isset($_SESSION['login']) && isset($_COOKIE['user_login'])) {
+// Logika Pelindung: Pulihkan session HANYA jika cookie tersimpan dan tidak kosong
+if (!isset($_SESSION['login']) && !empty($_COOKIE['user_login'])) {
     $_SESSION['login'] = true;
     $_SESSION['username'] = $_COOKIE['user_login'];
 }
 
-// Cek status login
-if (!isset($_SESSION['login'])) {
+// Cek status login (Wajibkan redirect jika tidak valid)
+if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
     header("Location: login.php");
     exit();
 }
@@ -82,11 +82,6 @@ if ($menu == 'rekap') {
         $total_pages = ceil($total_data / $limit);
         if ($total_pages < 1) $total_pages = 1;
 
-        /**
-         * PERBAIKAN SINKRONISASI DI SINI:
-         * Menggunakan CASE WHEN dan perbandingan regex (~ '^[0-9]+$') 
-         * untuk memastikan PostgreSQL tidak memaksakan CAST string kosong menjadi integer.
-         */
         $query_tampil = $query_gabungan . " 
             ORDER BY 
                 CASE 
@@ -98,7 +93,6 @@ if ($menu == 'rekap') {
             
         $stmt_tampil = $koneksi->prepare($query_tampil);
         
-        // Bind integer secara manual untuk LIMIT & OFFSET agar tidak error di PostgreSQL
         $stmt_tampil->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
         $stmt_tampil->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
         foreach ($params as $key => $val) {

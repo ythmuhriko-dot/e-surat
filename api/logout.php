@@ -1,11 +1,20 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-// 1. Hapus semua data session
-session_unset();
+// 1. Hapus semua variabel session
+$_SESSION = array();
+
+// 2. Hancurkan session
 session_destroy();
 
-// 2. Tampilkan pop-up notifikasi sebelum mengarahkan kembali ke login
+// 3. Hapus Cookie 'user_login' dari browser agar tidak otomatis re-login
+if (isset($_COOKIE['user_login'])) {
+    setcookie('user_login', '', time() - 3600, '/');
+}
+
+// 4. Notifikasi dan Redirect ke Login
 echo "<script>
         alert('Anda berhasil logout. Sampai jumpa!');
         window.location.href = 'login.php';
