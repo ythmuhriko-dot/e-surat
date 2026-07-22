@@ -11,7 +11,6 @@ $nama_surat_label = "Surat Keterangan";
 
 if (!empty($nomor_ambil) && !empty($jenis)) {
     try {
-        // Seleksi tabel database berdasarkan parameter jenis
         if ($jenis === 'sehat') {
             $table = "surat_sehat";
             $nama_surat_label = "Surat Keterangan Sehat";
@@ -39,6 +38,20 @@ if (!empty($nomor_ambil) && !empty($jenis)) {
 } else {
     die("<div style='padding:20px; font-family:Arial; color:red;'>Error: Parameter verifikasi tidak lengkap.</div>");
 }
+
+// --- KONVERSI LOGO KE BASE64 ---
+$path_logo = __DIR__ . '/logo_surabaya.png';
+if (!file_exists($path_logo)) {
+    $path_logo = __DIR__ . '/../logo_surabaya.png';
+}
+
+if (file_exists($path_logo)) {
+    $type_logo = pathinfo($path_logo, PATHINFO_EXTENSION);
+    $data_logo = file_get_contents($path_logo);
+    $src_logo = 'data:image/' . $type_logo . ';base64,' . base64_encode($data_logo);
+} else {
+    $src_logo = '/logo_surabaya.png';
+}
 ?>
 
 <!DOCTYPE html>
@@ -65,7 +78,7 @@ if (!empty($nomor_ambil) && !empty($jenis)) {
 <body>
 
 <div class="container">
-    <img class="logo" src="logo_surabaya.png" alt="Logo Pemkot">
+    <img class="logo" src="<?php echo $src_logo; ?>" alt="Logo Pemkot">
     <div class="kop">DINAS KESEHATAN KOTA SURABAYA</div>
     <div class="instansi">UPTD PUSKESMAS BANGKINGAN</div>
 
@@ -89,7 +102,7 @@ if (!empty($nomor_ambil) && !empty($jenis)) {
                     <td class="label">Penyebab Kematian</td>
                     <td>: <?php echo htmlspecialchars($data_surat['penyebab'] ?? '-'); ?></td>
                 </tr>
-            <?php else: // Untuk Surat Sakit dan Sehat ?>
+            <?php else: ?>
                 <tr>
                     <td class="label">Nama Pasien</td>
                     <td>: <strong><?php echo htmlspecialchars($data_surat['nama_pasien'] ?? '-'); ?></strong></td>
@@ -131,7 +144,6 @@ if (!empty($nomor_ambil) && !empty($jenis)) {
     <?php endif; ?>
 </div>
 
-<!-- SCRIPT ALERT OTOMATIS SAAT DI-SCAN -->
 <script>
     window.onload = function() {
         <?php if ($terdaftar): ?>

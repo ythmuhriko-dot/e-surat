@@ -45,6 +45,20 @@ $hubungan_pelapor       = $data['hubungan_pelapor'] ?? '-';
 $nama_dokter            = $data['nama_dokter'] ?? '-';
 $sip_dokter             = $data['sip_dokter'] ?? '-';
 $tanggal_sekarang       = tgl_indo(date('Y-m-d'));
+
+// --- KONVERSI LOGO KE BASE64 ---
+$path_logo = __DIR__ . '/logo_surabaya.png';
+if (!file_exists($path_logo)) {
+    $path_logo = __DIR__ . '/../logo_surabaya.png';
+}
+
+if (file_exists($path_logo)) {
+    $type_logo = pathinfo($path_logo, PATHINFO_EXTENSION);
+    $data_logo = file_get_contents($path_logo);
+    $src_logo = 'data:image/' . $type_logo . ';base64,' . base64_encode($data_logo);
+} else {
+    $src_logo = '/logo_surabaya.png';
+}
 ?>
 
 <!DOCTYPE html>
@@ -89,7 +103,7 @@ $tanggal_sekarang       = tgl_indo(date('Y-m-d'));
     </div>
 
     <div class="header-container">
-        <img class="logo-pemkot" src="logo_surabaya.png" alt="Logo Pemkot Surabaya">
+        <img class="logo-pemkot" src="<?php echo $src_logo; ?>" alt="Logo Pemkot Surabaya">
         <div class="kop-teks">
             <h2>PEMERINTAH KOTA SURABAYA</h2>
             <h2>DINAS KESEHATAN</h2>
