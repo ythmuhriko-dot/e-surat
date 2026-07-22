@@ -1,18 +1,21 @@
 {
-  "cleanUrls": true,
   "functions": {
     "api/**/*.php": {
       "runtime": "vercel-php@0.7.3"
     }
   },
-  "rewrites": [
+  "routes": [
     {
-      "source": "/",
-      "destination": "/api/login.php"
+      "src": "/",
+      "dest": "/api/login.php"
     },
     {
-      "source": "/((?!api/).*)",
-      "destination": "/api/$1"
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/$1.php"
     }
   ]
 }
