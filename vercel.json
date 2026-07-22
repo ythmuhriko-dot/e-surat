@@ -6,21 +6,14 @@
       "runtime": "vercel-php@0.7.3"
     }
   },
-  "routes": [
+  "rewrites": [
     {
-      "src": "/",
-      "dest": "/api/login.php"
+      "source": "/",
+      "destination": "/api/login.php"
     },
     {
-      "src": "/(.*)\\.php",
-      "status": 301,
-      "headers": {
-        "Location": "/$1"
-      }
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/api/$1"
+      "source": "/:path*",
+      "destination": "/api/:path*"
     }
   ]
 }
