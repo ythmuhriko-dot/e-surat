@@ -37,6 +37,20 @@ if (!function_exists('tgl_indo')) {
 $tanggal_buat_surat = tgl_indo(date('Y-m-d', strtotime($data['tanggal_dibuat'] ?? date('Y-m-d'))));
 $tanggal_mulai = tgl_indo($tanggal_mulai_raw);
 $tanggal_selesai = tgl_indo($tanggal_selesai_raw);
+
+// --- KONVERSI LOGO KE BASE64 ---
+$path_logo = __DIR__ . '/../logo_surabaya.png'; // Cek file di root folder
+if (!file_exists($path_logo)) {
+    $path_logo = __DIR__ . '/logo_surabaya.png'; // Fallback jika sejajar dengan file ini
+}
+
+if (file_exists($path_logo)) {
+    $type_logo = pathinfo($path_logo, PATHINFO_EXTENSION);
+    $data_logo = file_get_contents($path_logo);
+    $src_logo = 'data:image/' . $type_logo . ';base64,' . base64_encode($data_logo);
+} else {
+    $src_logo = '/logo_surabaya.png'; // FallbackURL jika file tidak terbaca
+}
 ?>
 
 <!DOCTYPE html>
@@ -81,7 +95,8 @@ $tanggal_selesai = tgl_indo($tanggal_selesai_raw);
     </div>
 
     <div class="header-container">
-        <img class="logo-pemkot" src="/logo_surabaya.png" alt="Logo Pemkot Surabaya">
+        <!-- Menggunakan variabel $src_logo Base64 -->
+        <img class="logo-pemkot" src="<?php echo $src_logo; ?>" alt="Logo Pemkot Surabaya">
         <div class="kop-teks">
             <h2>PEMERINTAH KOTA SURABAYA</h2>
             <h2>DINAS KESEHATAN</h2>
