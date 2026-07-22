@@ -2,14 +2,18 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/login.php",
+      "src": "api/*.php",
       "use": "vercel-php"
     }
   ],
   "routes": [
     {
+      "src": "/",
+      "dest": "/api/login.php"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/api/index.php"
+      "dest": "/api/$1"
     }
   ]
 }
