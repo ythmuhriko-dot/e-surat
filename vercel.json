@@ -1,5 +1,4 @@
 {
-  "version": 2,
   "cleanUrls": true,
   "functions": {
     "api/**/*.php": {
@@ -12,8 +11,8 @@
       "destination": "/api/login.php"
     },
     {
-      "source": "/:path*",
-      "destination": "/api/:path*"
+      "source": "/((?!api/).*)",
+      "destination": "/api/$1"
     }
   ]
 }
