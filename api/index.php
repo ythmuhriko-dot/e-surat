@@ -105,6 +105,7 @@ if ($menu == 'rekap') {
     <meta charset="UTF-8">
     <title>Dashboard E-Surat</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/logo_surabaya.png">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
         body { display: flex; height: 100vh; background: #f4f7f6; color: #334155; }
