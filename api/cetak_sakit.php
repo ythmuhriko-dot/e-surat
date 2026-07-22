@@ -81,7 +81,7 @@ $tanggal_selesai = tgl_indo($tanggal_selesai_raw);
     </div>
 
     <div class="header-container">
-        <img class="logo-pemkot" src="logo_surabaya.png" alt="Logo Pemkot Surabaya">
+        <img class="logo-pemkot" src="/logo_surabaya.png" alt="Logo Pemkot Surabaya">
         <div class="kop-teks">
             <h2>PEMERINTAH KOTA SURABAYA</h2>
             <h2>DINAS KESEHATAN</h2>
