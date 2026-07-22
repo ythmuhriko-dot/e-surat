@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "cleanUrls": true,
   "functions": {
     "api/**/*.php": {
       "runtime": "vercel-php@0.7.3"
@@ -9,6 +10,13 @@
     {
       "src": "/",
       "dest": "/api/login.php"
+    },
+    {
+      "src": "/(.*)\\.php",
+      "status": 301,
+      "headers": {
+        "Location": "/$1"
+      }
     },
     {
       "src": "/(.*)",
