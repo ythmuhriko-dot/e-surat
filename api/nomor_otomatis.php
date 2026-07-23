@@ -1,6 +1,19 @@
 <?php
 include 'koneksi.php';
 
+// Helper function untuk merapikan Nama, Alamat, dll. (Huruf Depan Saja Yang Kapital)
+if (!function_exists('format_teks_rapi')) {
+    function format_teks_rapi($teks) {
+        if (empty($teks) || trim($teks) === '') return '-';
+        
+        // Hapus spasi berlebih di awal/akhir dan spasi ganda di tengah
+        $teks_clean = preg_replace('/\s+/', ' ', trim($teks));
+        
+        // Ubah huruf depan setiap kata menjadi KAPITAL (Title Case)
+        return mb_convert_case($teks_clean, MB_CASE_TITLE, "UTF-8");
+    }
+}
+
 function buat_nomor_surat_otomatis($kode_klasifikasi = "400.7.22.1") {
     global $koneksi;
     

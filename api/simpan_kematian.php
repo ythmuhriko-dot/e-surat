@@ -8,21 +8,21 @@ include 'nomor_otomatis.php';
 
 try {
     // Generate nomor baru secara real-time khusus Surat Kematian
-    // Ini menjamin counter tidak akan kembar meskipun form dibuka bersamaan
     $nomor_surat = buat_nomor_surat_otomatis("400.12.3.1");
 
-    $nama_jenazah      = $_POST['nama_jenazah'] ?? $_GET['nama_jenazah'] ?? '-';
+    // Pembersihan & Pengeset Teks Awal Kapital
+    $nama_jenazah      = format_teks_rapi($_POST['nama_jenazah'] ?? $_GET['nama_jenazah'] ?? '');
     $jenis_kelamin     = $_POST['jenis_kelamin'] ?? $_GET['jenis_kelamin'] ?? '-';
     $umur              = $_POST['umur'] ?? $_GET['umur'] ?? '-'; 
-    $alamat_jenazah    = $_POST['alamat_jenazah'] ?? $_GET['alamat_jenazah'] ?? '-';
-    $hari_meninggal    = $_POST['hari_meninggal'] ?? $_GET['hari_meninggal'] ?? '-';
-    $tanggal_meninggal = $_POST['tanggal_meninggal'] ?? $_GET['tanggal_meninggal'] ?? '2026-01-01';
+    $alamat_jenazah    = format_teks_rapi($_POST['alamat_jenazah'] ?? $_GET['alamat_jenazah'] ?? '');
+    $hari_meninggal    = format_teks_rapi($_POST['hari_meninggal'] ?? $_GET['hari_meninggal'] ?? '');
+    $tanggal_meninggal = $_POST['tanggal_meninggal'] ?? $_GET['tanggal_meninggal'] ?? date('Y-m-d');
     $jam_meninggal     = $_POST['jam_meninggal'] ?? $_GET['jam_meninggal'] ?? '-';
-    $tempat_meninggal  = $_POST['tempat_meninggal'] ?? $_GET['tempat_meninggal'] ?? '-';
-    $penyebab          = $_POST['penyebab'] ?? $_GET['penyebab'] ?? '-';
-    $nama_pelapor      = $_POST['nama_pelapor'] ?? $_GET['nama_pelapor'] ?? '-';
-    $hubungan_pelapor  = $_POST['hubungan_pelapor'] ?? $_GET['hubungan_pelapor'] ?? '-';
-    $nama_dokter       = $_POST['nama_dokter'] ?? $_GET['nama_dokter'] ?? '-';
+    $tempat_meninggal  = format_teks_rapi($_POST['tempat_meninggal'] ?? $_GET['tempat_meninggal'] ?? '');
+    $penyebab          = format_teks_rapi($_POST['penyebab'] ?? $_GET['penyebab'] ?? '');
+    $nama_pelapor      = format_teks_rapi($_POST['nama_pelapor'] ?? $_GET['nama_pelapor'] ?? '');
+    $hubungan_pelapor  = format_teks_rapi($_POST['hubungan_pelapor'] ?? $_GET['hubungan_pelapor'] ?? '');
+    $nama_dokter       = format_teks_rapi($_POST['nama_dokter'] ?? $_GET['nama_dokter'] ?? '');
     $sip_dokter        = $_POST['sip_dokter'] ?? $_GET['sip_dokter'] ?? '-';
 
     $query = "INSERT INTO surat_kematian (nomor_surat, nama_jenazah, jenis_kelamin, umur, alamat_jenazah, hari_meninggal, tanggal_meninggal, jam_meninggal, tempat_meninggal, penyebab, nama_pelapor, hubungan_pelapor, nama_dokter, sip_dokter) 

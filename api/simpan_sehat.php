@@ -7,22 +7,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Generate nomor baru secara real-time
         $nomor_surat = buat_nomor_surat_otomatis("400.7.22.1");
 
-        $nama_pasien   = $_POST['nama_pasien'] ?? '';
+        // Pembersihan & Pengeset Teks Awal Kapital
+        $nama_pasien   = format_teks_rapi($_POST['nama_pasien'] ?? '');
         $jenis_kelamin = $_POST['jenis_kelamin'] ?? '';
-        $umur          = $_POST['umur'] ?? 0;
-        $pekerjaan     = $_POST['pekerjaan'] ?? '';
-        $alamat        = $_POST['alamat_domisili'] ?? '';
+        $umur          = !empty($_POST['umur']) ? (int)$_POST['umur'] : 0;
+        $pekerjaan     = format_teks_rapi($_POST['pekerjaan'] ?? '');
+        $alamat        = format_teks_rapi($_POST['alamat_domisili'] ?? '');
         $tensi         = $_POST['tensi'] ?? '';
-        $nadi          = $_POST['nadi'] ?? 0;
+        $nadi          = !empty($_POST['nadi']) ? (int)$_POST['nadi'] : 0;
         $suhu          = $_POST['suhu'] ?? '';
-        $bb            = $_POST['berat_badan'] ?? 0;
-        $tb            = $_POST['tinggi_badan'] ?? 0;
+        $bb            = !empty($_POST['berat_badan']) ? (int)$_POST['berat_badan'] : 0;
+        $tb            = !empty($_POST['tinggi_badan']) ? (int)$_POST['tinggi_badan'] : 0;
         $gol_darah     = $_POST['gol_darah'] ?? '';
         $visus_kanan   = $_POST['visus_kanan'] ?? '';
         $visus_kiri    = $_POST['visus_kiri'] ?? '';
         $buta_warna    = $_POST['buta_warna'] ?? '';
-        $keperluan     = $_POST['keperluan'] ?? '';
-        $nama_dokter   = $_POST['nama_dokter'] ?? '';
+        $keperluan     = format_teks_rapi($_POST['keperluan'] ?? '');
+        $nama_dokter   = format_teks_rapi($_POST['nama_dokter'] ?? '');
         $sip_dokter    = $_POST['sip_dokter'] ?? '';
 
         $query = "INSERT INTO surat_sehat (nomor_surat, nama_pasien, jenis_kelamin, umur, pekerjaan, alamat_domisili, tensi, nadi, suhu, berat_badan, tinggi_badan, gol_darah, visus_kanan, visus_kiri, buta_warna, keperluan, nama_dokter, sip_dokter) 
@@ -33,14 +34,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             ':nomor_surat'   => $nomor_surat,
             ':nama_pasien'   => $nama_pasien,
             ':jenis_kelamin' => $jenis_kelamin,
-            ':umur'          => (int)$umur,
+            ':umur'          => $umur,
             ':pekerjaan'     => $pekerjaan,
             ':alamat'        => $alamat,
             ':tensi'         => $tensi,
-            ':nadi'          => (int)$nadi,
+            ':nadi'          => $nadi,
             ':suhu'          => $suhu,
-            ':bb'            => (int)$bb,
-            ':tb'            => (int)$tb,
+            ':bb'            => $bb,
+            ':tb'            => $tb,
             ':gol_darah'     => $gol_darah,
             ':visus_kanan'   => $visus_kanan,
             ':visus_kiri'    => $visus_kiri,

@@ -7,15 +7,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Generate nomor baru secara real-time
         $nomor_surat = buat_nomor_surat_otomatis("400.7.22.1");
 
-        $nama_pasien          = $_POST['nama_pasien'] ?? '';
+        // Pembersihan & Pengeset Teks Awal Kapital
+        $nama_pasien          = format_teks_rapi($_POST['nama_pasien'] ?? '');
         $jenis_kelamin        = $_POST['jenis_kelamin'] ?? '';
-        $umur                 = $_POST['umur'] ?? 0;
-        $alamat_domisili      = $_POST['alamat_domisili'] ?? '';
-        $pekerjaan            = $_POST['pekerjaan'] ?? '';
-        $lama_istirahat_teks  = $_POST['lama_istirahat_teks'] ?? ''; 
-        $lama_istirahat_angka = $_POST['lama_istirahat_angka'] ?? 0; 
-        $tanggal_mulai        = $_POST['tanggal_mulai'] ?? null;
-        $nama_dokter          = $_POST['nama_dokter'] ?? '';
+        $umur                 = !empty($_POST['umur']) ? (int)$_POST['umur'] : 0;
+        $alamat_domisili      = format_teks_rapi($_POST['alamat_domisili'] ?? '');
+        $pekerjaan            = format_teks_rapi($_POST['pekerjaan'] ?? '');
+        $lama_istirahat_teks  = format_teks_rapi($_POST['lama_istirahat_teks'] ?? ''); 
+        $lama_istirahat_angka = !empty($_POST['lama_istirahat_angka']) ? (int)$_POST['lama_istirahat_angka'] : 0; 
+        $tanggal_mulai        = !empty($_POST['tanggal_mulai']) ? $_POST['tanggal_mulai'] : null;
+        $nama_dokter          = format_teks_rapi($_POST['nama_dokter'] ?? '');
         $sip_dokter           = $_POST['sip_dokter'] ?? '';
 
         $query = "INSERT INTO surat_sakit (nomor_surat, nama_pasien, jenis_kelamin, umur, alamat_domisili, pekerjaan, alasan_sakit, lama_istirahat, tanggal_mulai, nama_dokter, sip_dokter) 
@@ -26,12 +27,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             ':nomor_surat'         => $nomor_surat,
             ':nama_pasien'          => $nama_pasien,
             ':jenis_kelamin'        => $jenis_kelamin,
-            ':umur'                 => (int)$umur,
+            ':umur'                 => $umur,
             ':alamat_domisili'      => $alamat_domisili,
             ':pekerjaan'            => $pekerjaan,
             ':alasan_sakit'         => $lama_istirahat_teks,
-            ':lama_istirahat'       => (int)$lama_istirahat_angka,
-            ':tanggal_mulai'        => $tanggal_mulai ? $tanggal_mulai : null,
+            ':lama_istirahat'       => $lama_istirahat_angka,
+            ':tanggal_mulai'        => $tanggal_mulai,
             ':nama_dokter'          => $nama_dokter,
             ':sip_dokter'           => $sip_dokter
         ]);
