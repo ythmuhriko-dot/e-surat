@@ -3,23 +3,9 @@ include 'koneksi.php';
 include 'nomor_otomatis.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $nomor_surat_form = $_POST['nomor_surat'] ?? '';
-
     try {
-        $stmt_kematian = $koneksi->prepare("SELECT nomor_surat FROM surat_kematian WHERE nomor_surat = :nomor");
-        $stmt_kematian->execute([':nomor' => $nomor_surat_form]);
-        
-        $stmt_sakit = $koneksi->prepare("SELECT nomor_surat FROM surat_sakit WHERE nomor_surat = :nomor");
-        $stmt_sakit->execute([':nomor' => $nomor_surat_form]);
-        
-        $stmt_sehat = $koneksi->prepare("SELECT nomor_surat FROM surat_sehat WHERE nomor_surat = :nomor");
-        $stmt_sehat->execute([':nomor' => $nomor_surat_form]);
-
-        if ($stmt_kematian->fetch() || $stmt_sakit->fetch() || $stmt_sehat->fetch()) {
-            $nomor_surat = buat_nomor_surat_otomatis();
-        } else {
-            $nomor_surat = $nomor_surat_form;
-        }
+        // Generate nomor baru secara real-time
+        $nomor_surat = buat_nomor_surat_otomatis("400.7.22.1");
 
         $nama_pasien          = $_POST['nama_pasien'] ?? '';
         $jenis_kelamin        = $_POST['jenis_kelamin'] ?? '';
@@ -52,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         if ($simpan) {
             echo "<script>
-                    alert('Data Surat Sakit Sesuai Format Word Berhasil Disimpan!');
+                    alert('Data Surat Sakit Berhasil Disimpan!');
                     window.location.href = 'cetak_sakit.php?nomor=' + encodeURIComponent('" . $nomor_surat . "');
                   </script>";
         }
