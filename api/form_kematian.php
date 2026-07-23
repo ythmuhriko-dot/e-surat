@@ -1,6 +1,7 @@
 <?php 
 include 'nomor_otomatis.php'; 
-$nomor_surat_baru = buat_nomor_surat_otomatis();
+// Kirim kode klasifikasi khusus untuk kematian
+$nomor_surat_baru = buat_nomor_surat_otomatis("400.12.3.1"); 
 ?>
 <?php
 include 'koneksi.php';
