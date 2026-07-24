@@ -122,7 +122,7 @@ if (file_exists($path_logo)) {
     <div class="isi-surat">
         <p>Yang bertanda tangan dibawah ini, Dokter Puskesmas Bangkingan Dinas Kesehatan Kota Surabaya, menerangkan bahwa :</p>
         <table class="table-data">
-            <tr><td class="label-kolom">Nama Jenazah</td><td>:</td><td><strong><?php echo htmlspecialchars(strtoupper($nama_jenazah)); ?></strong></td></tr>
+            <tr><td class="label-kolom">Nama Jenazah</td><td>:</td><td><strong><?php echo htmlspecialchars($nama_jenazah); ?></strong></td></tr>
             <tr><td class="label-kolom">Jenis Kelamin</td><td>:</td><td><?php echo htmlspecialchars($jenis_kelamin); ?></td></tr>
             <tr><td class="label-kolom">Umur</td><td>:</td><td><?php echo htmlspecialchars($umur); ?></td></tr>
             <tr><td class="label-kolom">Alamat Domisili</td><td>:</td><td><?php echo htmlspecialchars($alamat_jenazah); ?></td></tr>
