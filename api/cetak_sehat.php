@@ -68,8 +68,8 @@ if (file_exists($path_logo)) {
         .table-data td { padding: 2px 5px; vertical-align: top; }
         .table-data td.label-kolom { width: 160px; }
         .footer-container { margin-top: 25px; display: flex; justify-content: space-between; align-items: flex-start; font-size: 15px; page-break-inside: avoid; }
-        .ttd-box { text-align: left; width: 320px; margin-left: 100px; }
-        .qrcode-box { text-align: center; margin-left: 50px; }
+        .ttd-box { text-align: left; width: 300px; margin-left: auto; }
+        .qrcode-box { text-align: center; margin-left: 0; }
         .ttd-space { height: 60px; }
         .ttd-box p { margin: 0; line-height: 1.2; }
         .ttd-container { display: block; width: 100%; }
