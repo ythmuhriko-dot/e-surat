@@ -77,7 +77,7 @@ try {
             <div class="row-flex">
                 <div class="form-group">
                     <label>Tekanan Darah (mmHg)</label>
-                    <input type="text" name="tansi" placeholder="120/80" required>
+                    <input type="text" name="tensi" placeholder="120/80" required>
                 </div>
                 <div class="form-group">
                     <label>Nadi (x/menit)</label>
