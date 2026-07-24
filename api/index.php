@@ -1,7 +1,6 @@
 <?php
 // ==============================================================================
 // 1. ROUTER SERVERLESS VERCEL
-// Menangani pemanggilan file .php lain secara internal agar lolos limit 12 Lambda
 // ==============================================================================
 $request_uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $requested_file = basename($request_uri);
@@ -15,26 +14,22 @@ if (!empty($requested_file) && $requested_file !== 'index.php') {
 }
 
 // ==============================================================================
-// 2. LOGIKA DASHBOARD & REKAP (BAWAAN INDEX.PHP)
+// 2. LOGIKA DASHBOARD & REKAP (INDEX.PHP)
 // ==============================================================================
 
-// Aktifkan output buffering untuk mencegah error "headers already sent"
 ob_start();
 
 include 'koneksi.php';
 
-// Memulai session dengan aman
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Logika Pelindung: Pulihkan session HANYA jika cookie tersimpan dan tidak kosong
 if (!isset($_SESSION['login']) && !empty($_COOKIE['user_login'])) {
     $_SESSION['login'] = true;
     $_SESSION['username'] = $_COOKIE['user_login'];
 }
 
-// Cek status login (Wajibkan redirect jika tidak valid)
 if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
     header("Location: login.php");
     exit();
@@ -43,6 +38,9 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
 $menu = isset($_GET['menu']) ? $_GET['menu'] : '';
 
 if ($menu == 'rekap') {
+    // 1. Ambil Parameter Filter (default: semua)
+    $filter = isset($_GET['filter']) ? $_GET['filter'] : 'semua';
+
     $limit = 10;
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     if ($page < 1) $page = 1;
@@ -50,32 +48,44 @@ if ($menu == 'rekap') {
 
     $cari = isset($_GET['cari']) ? trim($_GET['cari']) : '';
 
-    // Penanganan klausa WHERE dan parameter array untuk PostgreSQL
     $where = "";
     $params = [];
     if ($cari != "") {
-        $where = " WHERE nomor_surat LIKE :cari1 OR subjek LIKE :cari2 OR nama_dokter LIKE :cari3";
+        $where = " WHERE nomor_surat ILIKE :cari1 OR subjek ILIKE :cari2 OR nama_dokter ILIKE :cari3";
         $params[':cari1'] = "%$cari%";
         $params[':cari2'] = "%$cari%";
         $params[':cari3'] = "%$cari%";
     }
 
-    // Master Query Gabungan
-    $query_gabungan = "
-        SELECT * FROM (
+    // 2. Tentukan Subquery Berdasarkan Filter
+    if ($filter == 'pelayanan') {
+        $sub_query = "
+            SELECT nomor_surat, 'Surat Sakit' AS jenis, nama_pasien AS subjek, nama_dokter, 'cetak_sakit.php' AS link, NULL AS file_upload FROM surat_sakit
+            UNION ALL
+            SELECT nomor_surat, 'Surat Sehat' AS jenis, nama_pasien AS subjek, nama_dokter, 'cetak_sehat.php' AS link, NULL AS file_upload FROM surat_sehat
+            UNION ALL
+            SELECT nomor_surat, 'Surat Kematian' AS jenis, nama_jenazah AS subjek, nama_dokter, 'cetak_kematian.php' AS link, NULL AS file_upload FROM surat_kematian
+        ";
+    } elseif ($filter == 'non_pelayanan') {
+        $sub_query = "
+            SELECT nomor_surat, 'Non-Pelayanan' AS jenis, perihal AS subjek, CAST('-' AS VARCHAR) AS nama_dokter, CAST('#' AS VARCHAR) AS link, file_surat AS file_upload FROM surat_non_pelayanan
+        ";
+    } else {
+        $sub_query = "
             SELECT nomor_surat, 'Surat Sakit' AS jenis, nama_pasien AS subjek, nama_dokter, 'cetak_sakit.php' AS link, NULL AS file_upload FROM surat_sakit
             UNION ALL
             SELECT nomor_surat, 'Surat Sehat' AS jenis, nama_pasien AS subjek, nama_dokter, 'cetak_sehat.php' AS link, NULL AS file_upload FROM surat_sehat
             UNION ALL
             SELECT nomor_surat, 'Surat Kematian' AS jenis, nama_jenazah AS subjek, nama_dokter, 'cetak_kematian.php' AS link, NULL AS file_upload FROM surat_kematian
             UNION ALL
-            SELECT nomor_surat, 'Non-Pelayanan' AS jenis, perihal AS subjek, CAST('-' AS VARCHAR) AS nama_dokter, CAST('#' AS VARCHAR) AS link, file_surat FROM surat_non_pelayanan
-        ) AS gabungan
-        $where
-    ";
+            SELECT nomor_surat, 'Non-Pelayanan' AS jenis, perihal AS subjek, CAST('-' AS VARCHAR) AS nama_dokter, CAST('#' AS VARCHAR) AS link, file_surat AS file_upload FROM surat_non_pelayanan
+        ";
+    }
+
+    $query_gabungan = "SELECT * FROM ($sub_query) AS gabungan $where";
 
     try {
-        // Hitung total data
+        // Hitung Total Sesuai Filter
         $stmt_total = $koneksi->prepare("SELECT COUNT(*) as total FROM ($query_gabungan) as sub");
         $stmt_total->execute($params);
         $total_data = $stmt_total->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
@@ -100,13 +110,14 @@ if ($menu == 'rekap') {
         }
         $stmt_tampil->execute();
 
-        // Hitungan total tiap jenis surat
+        // Hitung Angka Summary Cards
         $count_sakit = $koneksi->query("SELECT COUNT(*) FROM surat_sakit")->fetchColumn();
         $count_sehat = $koneksi->query("SELECT COUNT(*) FROM surat_sehat")->fetchColumn();
         $count_kematian = $koneksi->query("SELECT COUNT(*) FROM surat_kematian")->fetchColumn();
         $count_non_pelayanan = $koneksi->query("SELECT COUNT(*) FROM surat_non_pelayanan")->fetchColumn();
         
-        $total_keseluruhan = $count_sakit + $count_sehat + $count_kematian + $count_non_pelayanan;
+        $total_pelayanan = $count_sakit + $count_sehat + $count_kematian;
+        $total_keseluruhan = $total_pelayanan + $count_non_pelayanan;
     } catch (PDOException $e) {
         die("Gagal memuat rekap database: " . $e->getMessage());
     }
@@ -150,6 +161,13 @@ if ($menu == 'rekap') {
         table th { background: #f8fafc; color: #64748b; font-size: 13px; font-weight: 600; padding: 16px 24px; border-bottom: 1px solid #e2e8f0; text-transform: uppercase; letter-spacing: 0.5px; }
         table td { padding: 16px 24px; font-size: 14px; color: #334155; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
         table tr:hover td { background-color: #f8fafc; }
+
+        /* Style Tambahan untuk Tombol Filter Baru */
+        .btn-filter { text-decoration: none; padding: 8px 14px; font-size: 13px; font-weight: 600; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; background: #ffffff; transition: 0.2s; }
+        .btn-filter:hover { background: #f1f5f9; }
+        .btn-filter.active-semua { background: #334155; color: white; border-color: #334155; }
+        .btn-filter.active-pelayanan { background: #2563eb; color: white; border-color: #2563eb; }
+        .btn-filter.active-non { background: #d97706; color: white; border-color: #d97706; }
     </style>
 </head>
 <body>
@@ -190,6 +208,7 @@ if ($menu == 'rekap') {
         </div>
 
         <div class="table-wrapper">
+            <!-- BARIS IMPORT -->
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 24px; border-bottom: 1px solid #f1f5f9;">
                 <div class="table-title" style="padding: 0; border-bottom: none;">📋 Riwayat Sinkronisasi Log Surat</div>
                 <div style="background: #f8fafc; padding: 8px 15px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 10px;">
@@ -201,13 +220,34 @@ if ($menu == 'rekap') {
                 </div>
             </div>
 
-            <div style="margin: 20px 0 15px 0; text-align: right; padding-right: 24px;">
-                <form method="GET" action="index.php" style="display: inline-block;">
-                    <input type="hidden" name="menu" value="rekap">
-                    <input type="text" name="cari" placeholder="Cari nomor/nama pasien..." value="<?php echo htmlspecialchars($cari); ?>" style="padding: 8px 12px; width: 250px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
-                    <button type="submit" style="padding: 8px 15px; background: #334155; color: white; border: none; border-radius: 6px; font-size: 14px; margin-left: 5px;">Cari</button>
-                    <a href="index.php?menu=rekap" style="padding: 8px; text-decoration: none; color: #ef4444; font-size: 14px; margin-left: 5px; font-weight: 500;">Reset</a>
-                </form>
+            <!-- BARIS TOMBOL FILTER DAN SEARCH (DITAMBAHKAN DI SINI) -->
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 24px; background: #fafafa; border-bottom: 1px solid #f1f5f9;">
+                <!-- DUA TOMBOL FILTER SESUAI PERMINTAAN -->
+                <div style="display: flex; gap: 8px;">
+                    <a href="index.php?menu=rekap&filter=semua" 
+                       class="btn-filter <?php echo ($filter == 'semua') ? 'active-semua' : ''; ?>">
+                       📋 Semua Surat (<?php echo $total_keseluruhan; ?>)
+                    </a>
+                    <a href="index.php?menu=rekap&filter=pelayanan" 
+                       class="btn-filter <?php echo ($filter == 'pelayanan') ? 'active-pelayanan' : ''; ?>">
+                       🩺 Surat Pelayanan (<?php echo $total_pelayanan; ?>)
+                    </a>
+                    <a href="index.php?menu=rekap&filter=non_pelayanan" 
+                       class="btn-filter <?php echo ($filter == 'non_pelayanan') ? 'active-non' : ''; ?>">
+                       📑 Surat Non Pelayanan (<?php echo $count_non_pelayanan; ?>)
+                    </a>
+                </div>
+
+                <!-- FORM PENCARIAN -->
+                <div>
+                    <form method="GET" action="index.php" style="display: inline-block;">
+                        <input type="hidden" name="menu" value="rekap">
+                        <input type="hidden" name="filter" value="<?php echo htmlspecialchars($filter); ?>">
+                        <input type="text" name="cari" placeholder="Cari nomor/nama pasien..." value="<?php echo htmlspecialchars($cari); ?>" style="padding: 8px 12px; width: 220px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;">
+                        <button type="submit" style="padding: 8px 14px; background: #334155; color: white; border: none; border-radius: 6px; font-size: 13px; cursor: pointer;">Cari</button>
+                        <a href="index.php?menu=rekap&filter=<?php echo $filter; ?>" style="padding: 8px; text-decoration: none; color: #ef4444; font-size: 13px; font-weight: 500;">Reset</a>
+                    </form>
+                </div>
             </div>
 
             <table>
@@ -222,38 +262,43 @@ if ($menu == 'rekap') {
                 </thead>
                 <tbody>
                     <?php 
-                    while ($row = $stmt_tampil->fetch(PDO::FETCH_ASSOC)) {
-                        echo "<tr>";
-                        echo "<td>".htmlspecialchars($row['nomor_surat'])."</td>";
-                        echo "<td>".htmlspecialchars($row['jenis'])."</td>";
-                        echo "<td>".htmlspecialchars($row['subjek'])."</td>";
-                        echo "<td>".htmlspecialchars($row['nama_dokter'])."</td>";
-                        echo "<td>";
-                        
-                        if ($row['jenis'] == 'Non-Pelayanan') {
-                            echo "<a href='uploads/".htmlspecialchars($row['file_upload'])."' target='_blank'>📂 Buka</a> ";
-                        } else {
-                            echo "<a href='".htmlspecialchars($row['link'])."?nomor=".urlencode($row['nomor_surat'])."' target='_blank'>🖨️ Cetak</a> ";
-                        }
+                    if ($stmt_tampil->rowCount() > 0) {
+                        while ($row = $stmt_tampil->fetch(PDO::FETCH_ASSOC)) {
+                            echo "<tr>";
+                            echo "<td>".htmlspecialchars($row['nomor_surat'])."</td>";
+                            echo "<td>".htmlspecialchars($row['jenis'])."</td>";
+                            echo "<td>".htmlspecialchars($row['subjek'])."</td>";
+                            echo "<td>".htmlspecialchars($row['nama_dokter'])."</td>";
+                            echo "<td>";
+                            
+                            if ($row['jenis'] == 'Non-Pelayanan') {
+                                echo "<a href='uploads/".htmlspecialchars($row['file_upload'])."' target='_blank'>📂 Buka</a> ";
+                            } else {
+                                echo "<a href='".htmlspecialchars($row['link'])."?nomor=".urlencode($row['nomor_surat'])."' target='_blank'>🖨️ Cetak</a> ";
+                            }
 
-                        echo "<a href='hapus_surat.php?nomor=".urlencode($row['nomor_surat'])."&jenis=".urlencode($row['jenis'])."' onclick=\"return confirm('Yakin ingin menghapus data ini?');\" style='color: red; margin-left: 10px;'>🗑️ Hapus</a>";
-                        echo "</td></tr>";
-                    } 
+                            echo "<a href='hapus_surat.php?nomor=".urlencode($row['nomor_surat'])."&jenis=".urlencode($row['jenis'])."' onclick=\"return confirm('Yakin ingin menghapus data ini?');\" style='color: red; margin-left: 10px;'>🗑️ Hapus</a>";
+                            echo "</td></tr>";
+                        }
+                    } else {
+                        echo "<tr><td colspan='5' style='text-align:center; padding:20px; color:#94a3b8;'>Data tidak ditemukan untuk kategori filter ini.</td></tr>";
+                    }
                     ?>
                 </tbody>
             </table> 
 
             <div style="text-align: center; margin-top: 20px; padding-bottom: 10px;">
                 <?php 
+                $param_filter = "&filter=" . urlencode($filter);
                 $param_cari = $cari != "" ? "&cari=" . urlencode($cari) : "";
                 if($page > 1): ?>
-                    <a href="?menu=rekap&page=<?php echo $page - 1 . $param_cari; ?>">« Sebelumnya</a>
+                    <a href="?menu=rekap<?php echo $param_filter . $param_cari; ?>&page=<?php echo $page - 1; ?>">« Sebelumnya</a>
                 <?php endif; ?>
 
                 <span style="margin: 0 15px;">Halaman <?php echo $page; ?> dari <?php echo $total_pages; ?></span>
 
                 <?php if($page < $total_pages): ?>
-                    <a href="?menu=rekap&page=<?php echo $page + 1 . $param_cari; ?>">Selanjutnya »</a>
+                    <a href="?menu=rekap<?php echo $param_filter . $param_cari; ?>&page=<?php echo $page + 1; ?>">Selanjutnya »</a>
                 <?php endif; ?>
             </div>
         </div>
@@ -270,12 +315,9 @@ if ($menu == 'rekap') {
 
 </div>
 
-<!-- PEMICU ALERT LOGIN BERHASIL -->
 <?php if (isset($_GET['login']) && $_GET['login'] == 'success'): ?>
 <script>
     alert("Selamat! Anda berhasil login.");
-    
-    // Bersihkan URL parameter '?login=success' tanpa me-refresh halaman
     if (window.history.replaceState) {
         window.history.replaceState(null, null, window.location.pathname);
     }
@@ -285,6 +327,5 @@ if ($menu == 'rekap') {
 </body>
 </html>
 <?php 
-// Akhiri dan kirimkan output buffer ke browser
 ob_end_flush(); 
 ?>
