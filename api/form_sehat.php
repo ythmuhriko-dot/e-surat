@@ -54,7 +54,7 @@ try {
                 <div class="form-group">
                     <label>Jenis Kelamin</label>
                     <select name="jenis_kelamin" required>
-                        <option value="Laki-laki">Laki-laki</option>
+                        <option value="Laki-laki">Laki-Laki</option>
                         <option value="Perempuan">Perempuan</option>
                     </select>
                 </div>
