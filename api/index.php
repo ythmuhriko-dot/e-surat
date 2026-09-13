@@ -399,16 +399,16 @@ if ($menu == 'rekap') {
 
 </div>
 
+<!-- KOMPONEN WIDGET PETDEV PRABOWO (Penerapan Solusi 1) -->
 <div class="petdev-wrapper" id="petDevWidget" onclick="gantiDialogPrabowo()">
     <div class="petdev-speech-bubble" id="petSpeech">
         Kerja keras dan dedikasi Anda sangat luar biasa hari ini! 🔥
     </div>
     
     <div class="petdev-avatar-box">
-        <img src="https://petdex.dev/pets/prabowo.gif" 
+        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=PrabowoPresiden&backgroundColor=7a151b" 
              alt="PetDev Prabowo" 
-             class="petdev-img"
-             onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Prabowo';">
+             class="petdev-img">
         <div class="petdev-badge-tag">PetDev</div>
     </div>
 </div>
