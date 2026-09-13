@@ -197,14 +197,14 @@ if ($menu == 'rekap') {
         .btn-filter.active-pelayanan { background: #2563eb; color: white; border-color: #2563eb; }
         .btn-filter.active-non { background: #d97706; color: white; border-color: #d97706; }
 
-        /* STYLING PETDEV PRABOWO WIDGET */
+        /* STYLING PETDEV PRABOWO WIDGET (DIPINDAH KE KIRI) */
         .petdev-wrapper {
             position: fixed;
             bottom: 20px;
-            right: 25px;
+            left: 280px; /* Diatur agar tidak tertutup sidebar */
             display: flex;
             flex-direction: column;
-            align-items: flex-end;
+            align-items: flex-start;
             z-index: 9999;
             cursor: pointer;
             user-select: none;
@@ -231,7 +231,7 @@ if ($menu == 'rekap') {
             content: '';
             position: absolute;
             bottom: -8px;
-            right: 35px;
+            left: 35px; /* Pindah panah balon ke kiri */
             width: 0;
             height: 0;
             border-left: 8px solid transparent;
@@ -330,30 +330,22 @@ if ($menu == 'rekap') {
             height: 70px;
             object-fit: contain;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
-            animation: walkBounce 0.6s ease-in-out infinite alternate;
+            mix-blend-mode: screen; /* Menghilangkan background hitam */
+            animation: walkBounce 0.6s ease-in-out infinite alternate, flipDirection 25s linear infinite;
         }
 
         @keyframes walkBackAndForth {
-            0% {
-                left: 10px;
-                transform: scaleX(1);
-            }
-            45% {
-                left: calc(100vw - 120px);
-                transform: scaleX(1);
-            }
-            50% {
-                left: calc(100vw - 120px);
-                transform: scaleX(-1);
-            }
-            95% {
-                left: 10px;
-                transform: scaleX(-1);
-            }
-            100% {
-                left: 10px;
-                transform: scaleX(1);
-            }
+            0% { left: 270px; }
+            45% { left: calc(100vw - 120px); }
+            50% { left: calc(100vw - 120px); }
+            95% { left: 270px; }
+            100% { left: 270px; }
+        }
+
+        @keyframes flipDirection {
+            0%, 45% { transform: scaleX(1); }
+            50%, 95% { transform: scaleX(-1); }
+            100% { transform: scaleX(1); }
         }
 
         @keyframes walkBounce {
