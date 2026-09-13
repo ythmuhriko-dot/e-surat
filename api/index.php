@@ -421,20 +421,19 @@ if ($menu == 'rekap') {
 
 </div>
 
-<!-- KOMPONEN WIDGET PETDEV PRABOWO (GIF Waving Direct Link) -->
+<!-- KOMPONEN WIDGET PETDEV PRABOWO (Safe Base64 SVG/GIF) -->
 <div class="petdev-wrapper" id="petDevWidget" onclick="gantiDialogPrabowo()">
     <div class="petdev-speech-bubble" id="petSpeech">
         Kerja keras dan dedikasi Anda sangat luar biasa hari ini! 🔥
     </div>
     
     <div class="petdev-avatar-box">
-        <img src="https://raw.githubusercontent.com/Codex31/codex-pets/main/pets/prabowo/waving.gif" 
+        <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='70'>🇮🇩</text></svg>" 
              alt="PetDev Prabowo" 
              class="petdev-img">
         <div class="petdev-badge-tag">PetDev</div>
     </div>
 </div>
-
 <script>
     const quotesPrabowo = [
         "Kerja keras dan dedikasi Anda sangat luar biasa hari ini! 🔥",
