@@ -291,8 +291,8 @@ if ($menu == 'rekap') {
             transition: transform 0.2s ease;
         }
 
-        /* MEMBALIKKAN ARAH HADAP GAMBAR KARAKTER SAAT JALAN KE KIRI */
-        .spawned-char-item.face-left .spawned-char-img {
+        /* MEMBALIKKAN ARAH HADAP GAMBAR SAAT JALAN KE KANAN */
+        .spawned-char-item.face-right .spawned-char-img {
             transform: scaleX(-1);
         }
 
@@ -594,8 +594,9 @@ if ($menu == 'rekap') {
             direction: direction
         };
 
-        if (direction === -1) {
-            charWrapper.classList.add('face-left');
+        // Karena GIF bawaan menghadap kiri, jika jalan ke kanan (1), balik gambarnya dengan class face-right
+        if (direction === 1) {
+            charWrapper.classList.add('face-right');
         }
 
         activeWalkers.push(walkerObj);
@@ -619,17 +620,17 @@ if ($menu == 'rekap') {
 
             walker.posX += walker.speed * walker.direction;
 
-            // PANTULAN DAN BALIK HADAP SAAT MENABRAK BATAS KANAN
+            // Nabrak batas kanan -> balik jalan ke kiri (hapus flip horizontal)
             if (walker.posX >= maxRight) {
                 walker.posX = maxRight;
                 walker.direction = -1;
-                walker.element.classList.add('face-left');
+                walker.element.classList.remove('face-right');
             } 
-            // PANTULAN DAN BALIK HADAP SAAT MENABRAK BATAS KIRI
+            // Nabrak batas kiri -> balik jalan ke kanan (tambah flip horizontal)
             else if (walker.posX <= 0) {
                 walker.posX = 0;
                 walker.direction = 1;
-                walker.element.classList.remove('face-left');
+                walker.element.classList.add('face-right');
             }
 
             walker.element.style.left = walker.posX + 'px';
