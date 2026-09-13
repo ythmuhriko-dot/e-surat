@@ -6,7 +6,12 @@ $request_uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $requested_file = basename($request_uri);
 
 if (!empty($requested_file) && $requested_file !== 'index.php') {
+    // Cek keberadaan file di folder /api dulu, jika tidak ada cek di Root Project
     $target_file = __DIR__ . '/' . $requested_file;
+    if (!file_exists($target_file)) {
+        $target_file = dirname(__DIR__) . '/' . $requested_file;
+    }
+
     if (file_exists($target_file) && is_file($target_file)) {
         $ext = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
         
@@ -22,9 +27,10 @@ if (!empty($requested_file) && $requested_file !== 'index.php') {
             'js'   => 'application/javascript'
         ];
 
-        // Jika file yang diminta adalah gambar/aset, kirim header lalu tampilkan isinya
+        // Jika file yang diminta adalah gambar/aset statis
         if (array_key_exists($ext, $mime_types)) {
             header('Content-Type: ' . $mime_types[$ext]);
+            header('Content-Length: ' . filesize($target_file));
             readfile($target_file);
             exit();
         }
@@ -427,7 +433,7 @@ if ($menu == 'rekap') {
     </div>
     
     <div class="petdev-avatar-box">
-        <img src="prabowo.gif" 
+        <img src="/prabowo.gif" 
              alt="PetDev Prabowo" 
              class="petdev-img">
         <div class="petdev-badge-tag">PetDev</div>
