@@ -152,7 +152,7 @@ if ($menu == 'rekap') {
     <link rel="icon" type="image/png" href="/logo_surabaya.png">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
-        body { display: flex; height: 100vh; background: #f4f7f6; color: #334155; }
+        body { display: flex; height: 100vh; background: #f4f7f6; color: #334155; overflow-x: hidden; }
         
         .sidebar { 
             width: 260px; 
@@ -163,6 +163,7 @@ if ($menu == 'rekap') {
             height: 100vh; 
             position: sticky; 
             top: 0; 
+            z-index: 1000;
         }
 
         .sidebar h2 { font-size: 18px; margin-bottom: 20px; border-bottom: 1px solid #a83d42; padding-bottom: 10px; }
@@ -199,7 +200,7 @@ if ($menu == 'rekap') {
         .btn-filter.active-pelayanan { background: #2563eb; color: white; border-color: #2563eb; }
         .btn-filter.active-non { background: #d97706; color: white; border-color: #d97706; }
 
-        /* KONTROL WIDGET DI BAWAH KIRI (DIPINDAHKAN DARI KANAN ATAS) */
+        /* KONTROL WIDGET DI BAWAH KIRI */
         .widget-controls-left {
             position: fixed;
             bottom: 20px;
@@ -232,25 +233,26 @@ if ($menu == 'rekap') {
         .btn-add { background: #ff7700; }
         .btn-destroy { background: #ef4444; display: none; }
 
-        /* CONTAINER TEMPAT KARAKTER YANG DI-SPAWN (KANAN BAWAH) */
+        /* AREA AREA KARAKTER WALKING PATROL */
         #narutoContainer {
             position: fixed;
-            bottom: 20px;
-            right: 30px;
+            bottom: 10px;
+            left: 270px;
+            right: 20px;
+            height: 120px;
             z-index: 9997;
-            display: flex;
-            flex-direction: row-reverse;
-            gap: 20px;
-            align-items: flex-end;
             pointer-events: none;
         }
 
         .spawned-char-item {
+            position: absolute;
+            bottom: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             pointer-events: auto;
             animation: popIn 0.3s ease-out;
+            will-change: transform;
         }
 
         .spawned-speech-bubble {
@@ -267,6 +269,7 @@ if ($menu == 'rekap') {
             text-align: center;
             position: relative;
             word-wrap: break-word;
+            white-space: nowrap;
         }
 
         .spawned-speech-bubble::after {
@@ -285,17 +288,17 @@ if ($menu == 'rekap') {
             height: 80px;
             object-fit: contain;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
-            animation: charBounce 0.8s ease-in-out infinite alternate;
+            transition: transform 0.2s ease;
+        }
+
+        /* MEMBALIKKAN ARAH HADAP GAMBAR KARAKTER SAAT JALAN KE KIRI */
+        .spawned-char-item.face-left .spawned-char-img {
+            transform: scaleX(-1);
         }
 
         @keyframes popIn {
             0% { transform: scale(0); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
-        }
-
-        @keyframes charBounce {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-5px); }
         }
 
         /* MODAL DIALOG POP-UP DI BAWAH KIRI */
@@ -497,13 +500,16 @@ if ($menu == 'rekap') {
 
 </div>
 
+<!-- KONTROL WIDGET DI BAWAH KIRI -->
 <div class="widget-controls-left">
     <button class="widget-btn btn-add" onclick="openInputModal()" title="Tambah Karakter Naruto">+</button>
     <button class="widget-btn btn-destroy" id="btnDestroy" onclick="destroyAllCharacters()" title="Destroy All">💥</button>
 </div>
 
+<!-- AREA ANIMASI JALAN KARAKTER -->
 <div id="narutoContainer"></div>
 
+<!-- MODAL DIALOG POP-UP -->
 <div class="modal-overlay" id="inputModal">
     <div class="modal-card">
         <h4>Panggil Karakter Naruto 🍃</h4>
@@ -517,18 +523,35 @@ if ($menu == 'rekap') {
 
 <script>
     // --------------------------------------------------------------------------
-    // LOGIKA KARAKTER NARUTO (RANDOM CHARACTER SPAWN, LEFT POPUP & CONTROLS)
+    // LOGIKA KARAKTER NARUTO (WALKING PATROL & ANTI-DUPLICATE QUEUE)
     // --------------------------------------------------------------------------
     const narutoCharacters = [
         { name: 'Naruto', img: '/naruto.gif' },
         { name: 'Sasuke', img: '/sasuke.gif' },
         { name: 'Kakashi', img: '/kakashi.gif' },
-        { name: 'Kisame', img: '/kisame.gif' },
-        { name: 'Itachi', img: '/itachi.gif' },
-        { name: 'Jiraya', img: '/jiraya.gif' },
-        { name: 'Hokage', img: '/hokage.gif' },
-
+        { name: 'Kiba', img: '/kiba.gif' },
+        { name: 'Neji', img: '/neji.gif' },
+        { name: 'Sakura', img: '/sakura.gif' },
+        { name: 'Shikamaru', img: '/shikamaru.gif' },
+        { name: 'Iruka', img: '/iruka.gif' },
+        { name: 'Tobi', img: '/tobi.gif' }
     ];
+
+    let charQueue = [];
+    let activeWalkers = [];
+    let animationFrameId = null;
+
+    // SISTEM ANTREAN UNTUK MENCEGAH KARAKTER DOBEL BERURUTAN
+    function getNextCharacter() {
+        if (charQueue.length === 0) {
+            charQueue = [...narutoCharacters];
+            for (let i = charQueue.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [charQueue[i], charQueue[j]] = [charQueue[j], charQueue[i]];
+            }
+        }
+        return charQueue.pop();
+    }
 
     function openInputModal() {
         document.getElementById('inputModal').style.display = 'flex';
@@ -544,28 +567,89 @@ if ($menu == 'rekap') {
         const textInput = document.getElementById('narutoText').value.trim();
         if (!textInput) return;
 
-        // Memilih karakter secara RANDOM dari daftar GIF
-        const randomIndex = Math.floor(Math.random() * narutoCharacters.length);
-        const randomChar = narutoCharacters[randomIndex];
+        const container = document.getElementById('narutoContainer');
+        const containerWidth = container.clientWidth || (window.innerWidth - 290);
+        
+        const nextChar = getNextCharacter();
         
         const charWrapper = document.createElement('div');
         charWrapper.className = 'spawned-char-item';
         
         charWrapper.innerHTML = `
             <div class="spawned-speech-bubble">${escapeHtml(textInput)}</div>
-            <img src="${randomChar.img}" alt="${randomChar.name}" class="spawned-char-img" onerror="this.src='/logo_surabaya.png'">
+            <img src="${nextChar.img}" alt="${nextChar.name}" class="spawned-char-img" onerror="this.src='/logo_surabaya.png'">
         `;
 
-        document.getElementById('narutoContainer').appendChild(charWrapper);
+        container.appendChild(charWrapper);
+
+        // INISIALISASI POSISI & KECEPATAN JALAN
+        const initialPosX = Math.random() * Math.max(0, containerWidth - 100);
+        const speed = 1 + Math.random() * 1.5; // Kecepatan acak antara 1px - 2.5px per frame
+        const direction = Math.random() > 0.5 ? 1 : -1; // 1 = ke kanan, -1 = ke kiri
+
+        const walkerObj = {
+            element: charWrapper,
+            posX: initialPosX,
+            speed: speed,
+            direction: direction
+        };
+
+        if (direction === -1) {
+            charWrapper.classList.add('face-left');
+        }
+
+        activeWalkers.push(walkerObj);
 
         document.getElementById('btnDestroy').style.display = 'flex';
-
         closeInputModal();
+
+        if (!animationFrameId) {
+            animationFrameId = requestAnimationFrame(updateWalkers);
+        }
+    }
+
+    // ANIMASI PATROLI BERJALAN BOLAK-BALIK
+    function updateWalkers() {
+        const container = document.getElementById('narutoContainer');
+        const containerWidth = container.clientWidth || (window.innerWidth - 290);
+
+        activeWalkers.forEach(walker => {
+            const elWidth = walker.element.offsetWidth || 100;
+            const maxRight = Math.max(0, containerWidth - elWidth);
+
+            walker.posX += walker.speed * walker.direction;
+
+            // PANTULAN DAN BALIK HADAP SAAT MENABRAK BATAS KANAN
+            if (walker.posX >= maxRight) {
+                walker.posX = maxRight;
+                walker.direction = -1;
+                walker.element.classList.add('face-left');
+            } 
+            // PANTULAN DAN BALIK HADAP SAAT MENABRAK BATAS KIRI
+            else if (walker.posX <= 0) {
+                walker.posX = 0;
+                walker.direction = 1;
+                walker.element.classList.remove('face-left');
+            }
+
+            walker.element.style.left = walker.posX + 'px';
+        });
+
+        if (activeWalkers.length > 0) {
+            animationFrameId = requestAnimationFrame(updateWalkers);
+        } else {
+            animationFrameId = null;
+        }
     }
 
     function destroyAllCharacters() {
         const container = document.getElementById('narutoContainer');
         container.innerHTML = '';
+        activeWalkers = [];
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+        }
         document.getElementById('btnDestroy').style.display = 'none';
     }
 
