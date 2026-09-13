@@ -6,7 +6,6 @@ $request_uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $requested_file = basename($request_uri);
 
 if (!empty($requested_file) && $requested_file !== 'index.php') {
-    // Cek keberadaan file di folder /api dulu, jika tidak ada cek di Root Project
     $target_file = __DIR__ . '/' . $requested_file;
     if (!file_exists($target_file)) {
         $target_file = dirname(__DIR__) . '/' . $requested_file;
@@ -15,7 +14,6 @@ if (!empty($requested_file) && $requested_file !== 'index.php') {
     if (file_exists($target_file) && is_file($target_file)) {
         $ext = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
         
-        // Tentukan MIME Type untuk aset statis/gambar
         $mime_types = [
             'gif'  => 'image/gif',
             'png'  => 'image/png',
@@ -27,7 +25,6 @@ if (!empty($requested_file) && $requested_file !== 'index.php') {
             'js'   => 'application/javascript'
         ];
 
-        // Jika file yang diminta adalah gambar/aset statis
         if (array_key_exists($ext, $mime_types)) {
             header('Content-Type: ' . $mime_types[$ext]);
             header('Content-Length: ' . filesize($target_file));
@@ -35,7 +32,6 @@ if (!empty($requested_file) && $requested_file !== 'index.php') {
             exit();
         }
 
-        // Jika file PHP biasa
         require $target_file;
         exit();
     }
@@ -66,7 +62,6 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
 $menu = isset($_GET['menu']) ? $_GET['menu'] : '';
 
 if ($menu == 'rekap') {
-    // 1. Ambil Parameter Filter (default: semua)
     $filter = isset($_GET['filter']) ? $_GET['filter'] : 'semua';
 
     $limit = 10;
@@ -85,7 +80,6 @@ if ($menu == 'rekap') {
         $params[':cari3'] = "%$cari%";
     }
 
-    // 2. Tentukan Subquery Berdasarkan Filter
     if ($filter == 'pelayanan') {
         $sub_query = "
             SELECT nomor_surat, 'Surat Sakit' AS jenis, nama_pasien AS subjek, nama_dokter, 'cetak_sakit.php' AS link, NULL AS file_upload FROM surat_sakit
@@ -113,7 +107,6 @@ if ($menu == 'rekap') {
     $query_gabungan = "SELECT * FROM ($sub_query) AS gabungan $where";
 
     try {
-        // Hitung Total Sesuai Filter
         $stmt_total = $koneksi->prepare("SELECT COUNT(*) as total FROM ($query_gabungan) as sub");
         $stmt_total->execute($params);
         $total_data = $stmt_total->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
@@ -138,7 +131,6 @@ if ($menu == 'rekap') {
         }
         $stmt_tampil->execute();
 
-        // Hitung Angka Summary Cards
         $count_sakit = $koneksi->query("SELECT COUNT(*) FROM surat_sakit")->fetchColumn();
         $count_sehat = $koneksi->query("SELECT COUNT(*) FROM surat_sehat")->fetchColumn();
         $count_kematian = $koneksi->query("SELECT COUNT(*) FROM surat_kematian")->fetchColumn();
@@ -161,11 +153,26 @@ if ($menu == 'rekap') {
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
         body { display: flex; height: 100vh; background: #f4f7f6; color: #334155; }
-        .sidebar { width: 260px; background: #36454F; color: white; padding: 20px; flex-shrink: 0; height: 100vh; position: sticky; top: 0; }
-        .sidebar h2 { font-size: 18px; margin-bottom: 30px; border-bottom: 1px solid #a83d42; padding-bottom: 10px; }
-        .menu-item { display: block; padding: 12px; color: #ffccd0; text-decoration: none; margin-bottom: 5px; border-radius: 4px; transition: 0.3s; }
+        
+        /* SIDEBAR DIPERBARUI (FLEXBOX VERTIKAL) */
+        .sidebar { 
+            width: 260px; 
+            background: #36454F; 
+            color: white; 
+            padding: 20px; 
+            flex-shrink: 0; 
+            height: 100vh; 
+            position: sticky; 
+            top: 0; 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar h2 { font-size: 18px; margin-bottom: 20px; border-bottom: 1px solid #a83d42; padding-bottom: 10px; }
+        .menu-item { display: block; padding: 10px 12px; color: #ffccd0; text-decoration: none; margin-bottom: 5px; border-radius: 4px; transition: 0.3s; }
         .menu-item:hover, .menu-item.active { background: #7a151b; color: white; }
-        .logout-btn { margin-top: 50px; color: #ff9999; }
+        .logout-btn { margin-top: 15px; color: #ff9999; }
         .main-content { flex: 1; padding: 30px; overflow-y: auto; background-color: #f8fafc; }
         .card-box { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         h1 { color: #333; margin-bottom: 20px; }
@@ -190,58 +197,58 @@ if ($menu == 'rekap') {
         table td { padding: 16px 24px; font-size: 14px; color: #334155; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
         table tr:hover td { background-color: #f8fafc; }
 
-        /* Style Tombol Filter */
         .btn-filter { text-decoration: none; padding: 8px 14px; font-size: 13px; font-weight: 600; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; background: #ffffff; transition: 0.2s; }
         .btn-filter:hover { background: #f1f5f9; }
         .btn-filter.active-semua { background: #334155; color: white; border-color: #334155; }
         .btn-filter.active-pelayanan { background: #2563eb; color: white; border-color: #2563eb; }
         .btn-filter.active-non { background: #d97706; color: white; border-color: #d97706; }
 
-        /* STYLING PETDEV PRABOWO WIDGET (DIPINDAH KE KIRI) */
+        /* STYLING PETDEV PRABOWO DI DALAM SIDEBAR */
         .petdev-wrapper {
-            position: fixed;
-            bottom: 20px;
-            left: 280px; /* Diatur agar tidak tertutup sidebar */
+            margin-top: 15px;
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
-            z-index: 9999;
+            align-items: center;
             cursor: pointer;
             user-select: none;
+            width: 100%;
+            border-top: 1px solid #4a5d6b;
+            padding-top: 15px;
         }
 
         .petdev-speech-bubble {
             background: #ffffff;
             color: #1e293b;
-            padding: 12px 18px;
-            border-radius: 16px;
-            font-size: 13px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            font-size: 11px;
             font-weight: 600;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             border: 1px solid #e2e8f0;
-            margin-bottom: 12px;
-            max-width: 240px;
+            margin-bottom: 10px;
+            width: 100%;
             position: relative;
             animation: petFloat 3s ease-in-out infinite;
-            line-height: 1.4;
-            transition: all 0.2s ease;
+            line-height: 1.3;
+            text-align: center;
         }
 
         .petdev-speech-bubble::after {
             content: '';
             position: absolute;
-            bottom: -8px;
-            left: 35px; /* Pindah panah balon ke kiri */
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
             width: 0;
             height: 0;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-top: 8px solid #ffffff;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid #ffffff;
         }
 
         .petdev-avatar-box {
-            width: 90px;
-            height: 90px;
+            width: 75px;
+            height: 75px;
             position: relative;
             display: flex;
             align-items: center;
@@ -250,42 +257,42 @@ if ($menu == 'rekap') {
         }
 
         .petdev-avatar-box:hover {
-            transform: scale(1.1);
+            transform: scale(1.08);
         }
 
         .petdev-img {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            filter: drop-shadow(0 8px 12px rgba(0,0,0,0.15));
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
             animation: petBounce 2s ease-in-out infinite alternate;
         }
 
         .petdev-badge-tag {
             position: absolute;
-            bottom: -4px;
-            right: 5px;
+            bottom: -2px;
+            right: 0px;
             background: #10b981;
             color: white;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 700;
-            padding: 3px 8px;
-            border-radius: 12px;
+            padding: 2px 6px;
+            border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-            border: 2px solid #ffffff;
+            border: 1.5px solid #ffffff;
         }
 
         @keyframes petFloat {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
+            50% { transform: translateY(-4px); }
         }
 
         @keyframes petBounce {
             0% { transform: translateY(0) rotate(0deg); }
-            100% { transform: translateY(-4px) rotate(2deg); }
+            100% { transform: translateY(-3px) rotate(2deg); }
         }
 
-        /* STYLING HEWAN JALAN-JALAN */
+        /* HEWAN JALAN-JALAN */
         .pet-walker-wrapper {
             position: fixed;
             bottom: 10px;
@@ -311,7 +318,6 @@ if ($menu == 'rekap') {
             margin-bottom: 6px;
             white-space: nowrap;
             position: relative;
-            transition: all 0.2s ease;
         }
 
         .pet-walker-bubble::after {
@@ -329,23 +335,16 @@ if ($menu == 'rekap') {
             width: 70px;
             height: 70px;
             object-fit: contain;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
-            mix-blend-mode: screen; /* Menghilangkan background hitam */
-            animation: walkBounce 0.6s ease-in-out infinite alternate, flipDirection 25s linear infinite;
+            mix-blend-mode: screen; 
+            animation: walkBounce 0.6s ease-in-out infinite alternate;
         }
 
         @keyframes walkBackAndForth {
-            0% { left: 270px; }
-            45% { left: calc(100vw - 120px); }
-            50% { left: calc(100vw - 120px); }
-            95% { left: 270px; }
-            100% { left: 270px; }
-        }
-
-        @keyframes flipDirection {
-            0%, 45% { transform: scaleX(1); }
-            50%, 95% { transform: scaleX(-1); }
-            100% { transform: scaleX(1); }
+            0% { left: 270px; transform: scaleX(1); }
+            45% { left: calc(100vw - 120px); transform: scaleX(1); }
+            50% { left: calc(100vw - 120px); transform: scaleX(-1); }
+            95% { left: 270px; transform: scaleX(-1); }
+            100% { left: 270px; transform: scaleX(1); }
         }
 
         @keyframes walkBounce {
@@ -357,17 +356,32 @@ if ($menu == 'rekap') {
 <body>
 
 <div class="sidebar">
-    <h2>E-Surat Bangkingan</h2>
-    <a href="index.php" class="menu-item <?php echo $menu == '' ? 'active' : ''; ?>">🏠 Dashboard</a>
-    <a href="index.php?menu=rekap" class="menu-item <?php echo $menu == 'rekap' ? 'active' : ''; ?>">📊 Rekap & Statistik</a>
-    <hr style="border:0; border-top:1px solid #a83d42; margin: 20px 0;">
-    <p style="padding: 10px; font-size: 17px;">SURAT PELAYANAN</p>
-    <a href="form_sakit.php" class="menu-item">🛏️ Surat Sakit</a>
-    <a href="form_sehat.php" class="menu-item">📧 Surat Sehat</a>
-    <a href="form_kematian.php" class="menu-item">🪦 Surat Kematian</a>
-    <p style="padding: 10px; font-size: 17px;">NON PELAYANAN</p>
-    <a href="form_non_pelayanan.php" class="menu-item">📝 Input Agenda</a>
-    <a href="logout.php" class="menu-item logout-btn">🚪 Keluar / Logout</a>
+    <div>
+        <h2>E-Surat Bangkingan</h2>
+        <a href="index.php" class="menu-item <?php echo $menu == '' ? 'active' : ''; ?>">🏠 Dashboard</a>
+        <a href="index.php?menu=rekap" class="menu-item <?php echo $menu == 'rekap' ? 'active' : ''; ?>">📊 Rekap & Statistik</a>
+        <hr style="border:0; border-top:1px solid #a83d42; margin: 15px 0;">
+        <p style="padding: 6px 10px; font-size: 14px; font-weight: 600; color: #cbd5e1;">SURAT PELAYANAN</p>
+        <a href="form_sakit.php" class="menu-item">🛏️ Surat Sakit</a>
+        <a href="form_sehat.php" class="menu-item">📧 Surat Sehat</a>
+        <a href="form_kematian.php" class="menu-item">🪦 Surat Kematian</a>
+        <p style="padding: 6px 10px; font-size: 14px; font-weight: 600; color: #cbd5e1; margin-top: 10px;">NON PELAYANAN</p>
+        <a href="form_non_pelayanan.php" class="menu-item">📝 Input Agenda</a>
+        <a href="logout.php" class="menu-item logout-btn">🚪 Keluar / Logout</a>
+    </div>
+
+    <div class="petdev-wrapper" id="petDevWidget" onclick="gantiDialogPrabowo()">
+        <div class="petdev-speech-bubble" id="petSpeech">
+            Kerja keras dan dedikasi Anda sangat luar biasa hari ini! 🔥
+        </div>
+        
+        <div class="petdev-avatar-box">
+            <img src="/prabowo.gif" 
+                 alt="PetDev Prabowo" 
+                 class="petdev-img">
+            <div class="petdev-badge-tag">PetDev</div>
+        </div>
+    </div>
 </div>
 
 <div class="main-content">
@@ -495,19 +509,6 @@ if ($menu == 'rekap') {
 
 </div>
 
-<div class="petdev-wrapper" id="petDevWidget" onclick="gantiDialogPrabowo()">
-    <div class="petdev-speech-bubble" id="petSpeech">
-        Kerja keras dan dedikasi Anda sangat luar biasa hari ini! 🔥
-    </div>
-    
-    <div class="petdev-avatar-box">
-        <img src="/prabowo.gif" 
-             alt="PetDev Prabowo" 
-             class="petdev-img">
-        <div class="petdev-badge-tag">PetDev</div>
-    </div>
-</div>
-
 <div class="pet-walker-wrapper" onclick="suaraHewan()">
     <div class="pet-walker-bubble" id="walkerSpeech">
         Permisi, mau lewat dulu... 🐾
@@ -533,7 +534,7 @@ if ($menu == 'rekap') {
         const speechElement = document.getElementById('petSpeech');
         
         speechElement.style.opacity = '0';
-        speechElement.style.transform = 'translateY(5px)';
+        speechElement.style.transform = 'translateY(3px)';
         
         setTimeout(() => {
             speechElement.innerText = quotesPrabowo[indexQuote];
@@ -542,7 +543,6 @@ if ($menu == 'rekap') {
         }, 150);
     }
 
-    // DIALOG HEWAN JALAN-JALAN
     const dialogHewan = [
         "Permisi, mau lewat dulu... 🐾",
         "Semangat kerjanya ya! 🐾",
