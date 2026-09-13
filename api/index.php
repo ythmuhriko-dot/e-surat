@@ -428,7 +428,7 @@ if ($menu == 'rekap') {
     </div>
     
     <div class="petdev-avatar-box">
-        <img src="prabowo.gif" 
+        <img src="prabowo.jpg" 
              alt="PetDev Prabowo" 
              class="petdev-img">
         <div class="petdev-badge-tag">PetDev</div>
