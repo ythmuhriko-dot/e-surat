@@ -199,11 +199,11 @@ if ($menu == 'rekap') {
         .btn-filter.active-pelayanan { background: #2563eb; color: white; border-color: #2563eb; }
         .btn-filter.active-non { background: #d97706; color: white; border-color: #d97706; }
 
-        /* WIDGET KONTROL POJOK KANAN */
-        .right-widget-controls {
+        /* KONTROL WIDGET DI BAWAH KIRI (DIPINDAHKAN DARI KANAN ATAS) */
+        .widget-controls-left {
             position: fixed;
-            top: 20px;
-            right: 25px;
+            bottom: 20px;
+            left: 20px;
             z-index: 9999;
             display: flex;
             gap: 10px;
@@ -232,7 +232,7 @@ if ($menu == 'rekap') {
         .btn-add { background: #ff7700; }
         .btn-destroy { background: #ef4444; display: none; }
 
-        /* CONTAINER TEMPAT KARAKTER YANG DI-SPAWN */
+        /* CONTAINER TEMPAT KARAKTER YANG DI-SPAWN (KANAN BAWAH) */
         #narutoContainer {
             position: fixed;
             bottom: 20px;
@@ -298,29 +298,31 @@ if ($menu == 'rekap') {
             100% { transform: translateY(-5px); }
         }
 
-        /* MODAL DIALOG */
+        /* MODAL DIALOG POP-UP DI BAWAH KIRI */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0,0,0,0.3);
             z-index: 10000;
             display: none;
-            align-items: center;
-            justify-content: center;
+            align-items: flex-end;
+            justify-content: flex-start;
+            padding: 75px 20px;
         }
 
         .modal-card {
             background: white;
-            padding: 24px;
+            padding: 20px;
             border-radius: 16px;
-            width: 320px;
+            width: 300px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            animation: popIn 0.2s ease-out;
         }
 
         .modal-card h4 {
-            font-size: 16px;
+            font-size: 15px;
             color: #1e293b;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .modal-card textarea {
@@ -332,20 +334,20 @@ if ($menu == 'rekap') {
             font-size: 13px;
             resize: none;
             outline: none;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .modal-actions {
             display: flex;
             justify-content: flex-end;
-            gap: 10px;
+            gap: 8px;
         }
 
         .btn-modal {
-            padding: 8px 16px;
+            padding: 8px 14px;
             border-radius: 6px;
             border: none;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
         }
@@ -495,16 +497,13 @@ if ($menu == 'rekap') {
 
 </div>
 
-<!-- KONTROL POJOK KANAN (TOMBOL + & DESTROY) -->
-<div class="right-widget-controls">
-    <button class="widget-btn btn-destroy" id="btnDestroy" onclick="destroyAllCharacters()" title="Destroy All">💥</button>
+<div class="widget-controls-left">
     <button class="widget-btn btn-add" onclick="openInputModal()" title="Tambah Karakter Naruto">+</button>
+    <button class="widget-btn btn-destroy" id="btnDestroy" onclick="destroyAllCharacters()" title="Destroy All">💥</button>
 </div>
 
-<!-- CONTAINER KARAKTER YANG DICETAK -->
 <div id="narutoContainer"></div>
 
-<!-- MODAL INPUT KALIMAT -->
 <div class="modal-overlay" id="inputModal">
     <div class="modal-card">
         <h4>Panggil Karakter Naruto 🍃</h4>
@@ -518,16 +517,18 @@ if ($menu == 'rekap') {
 
 <script>
     // --------------------------------------------------------------------------
-    // LOGIKA KARAKTER NARUTO (PLUS BUTTON, SPAWN SASUKE/NARUTO, DESTROY)
+    // LOGIKA KARAKTER NARUTO (RANDOM CHARACTER SPAWN, LEFT POPUP & CONTROLS)
     // --------------------------------------------------------------------------
     const narutoCharacters = [
         { name: 'Naruto', img: '/naruto.gif' },
         { name: 'Sasuke', img: '/sasuke.gif' },
         { name: 'Kakashi', img: '/kakashi.gif' },
-        { name: 'Sakura', img: '/sakura.gif' }
-    ];
+        { name: 'Kisame', img: '/kisame.gif' },
+        { name: 'Itachi', img: '/itachi.gif' },
+        { name: 'Jiraya', img: '/jiraya.gif' },
+        { name: 'Hokage', img: '/hokage.gif' },
 
-    let charIndex = 0;
+    ];
 
     function openInputModal() {
         document.getElementById('inputModal').style.display = 'flex';
@@ -543,19 +544,20 @@ if ($menu == 'rekap') {
         const textInput = document.getElementById('narutoText').value.trim();
         if (!textInput) return;
 
-        const currentChar = narutoCharacters[charIndex];
+        // Memilih karakter secara RANDOM dari daftar GIF
+        const randomIndex = Math.floor(Math.random() * narutoCharacters.length);
+        const randomChar = narutoCharacters[randomIndex];
         
         const charWrapper = document.createElement('div');
         charWrapper.className = 'spawned-char-item';
         
         charWrapper.innerHTML = `
             <div class="spawned-speech-bubble">${escapeHtml(textInput)}</div>
-            <img src="${currentChar.img}" alt="${currentChar.name}" class="spawned-char-img" onerror="this.src='/logo_surabaya.png'">
+            <img src="${randomChar.img}" alt="${randomChar.name}" class="spawned-char-img" onerror="this.src='/logo_surabaya.png'">
         `;
 
         document.getElementById('narutoContainer').appendChild(charWrapper);
 
-        charIndex = (charIndex + 1) % narutoCharacters.length;
         document.getElementById('btnDestroy').style.display = 'flex';
 
         closeInputModal();
@@ -565,7 +567,6 @@ if ($menu == 'rekap') {
         const container = document.getElementById('narutoContainer');
         container.innerHTML = '';
         document.getElementById('btnDestroy').style.display = 'none';
-        charIndex = 0;
     }
 
     function escapeHtml(text) {
