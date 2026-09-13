@@ -168,6 +168,15 @@ if ($menu == 'rekap') {
         .btn-filter.active-semua { background: #334155; color: white; border-color: #334155; }
         .btn-filter.active-pelayanan { background: #2563eb; color: white; border-color: #2563eb; }
         .btn-filter.active-non { background: #d97706; color: white; border-color: #d97706; }
+
+        /* CSS PETDEV PRABOWO WIDGET */
+        .petdev-container { position: fixed; bottom: 20px; right: 25px; display: flex; flex-direction: column; align-items: flex-end; z-index: 9999; cursor: pointer; }
+        .petdev-speech { background: #ffffff; color: #1e293b; padding: 10px 14px; border-radius: 12px; font-size: 12px; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.12); border: 1px solid #cbd5e1; margin-bottom: 8px; max-width: 220px; position: relative; animation: petBounce 3s infinite alternate; }
+        .petdev-speech::after { content: ''; position: absolute; bottom: -8px; right: 25px; border-width: 8px 8px 0; border-style: solid; border-color: #ffffff transparent; display: block; width: 0; }
+        .petdev-avatar { width: 75px; height: 75px; background: #1e293b; border: 3px solid #7a151b; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: transform 0.2s ease; position: relative; }
+        .petdev-avatar:hover { transform: scale(1.1) rotate(-3deg); }
+        .petdev-badge { position: absolute; bottom: -2px; right: -2px; background: #10b981; color: white; font-size: 9px; font-weight: bold; padding: 2px 6px; border-radius: 10px; border: 1px solid white; }
+        @keyframes petBounce { 0% { transform: translateY(0); } 100% { transform: translateY(-5px); } }
     </style>
 </head>
 <body>
@@ -220,9 +229,8 @@ if ($menu == 'rekap') {
                 </div>
             </div>
 
-            <!-- BARIS TOMBOL FILTER DAN SEARCH (DITAMBAHKAN DI SINI) -->
+            <!-- BARIS TOMBOL FILTER DAN SEARCH -->
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 24px; background: #fafafa; border-bottom: 1px solid #f1f5f9;">
-                <!-- DUA TOMBOL FILTER SESUAI PERMINTAAN -->
                 <div style="display: flex; gap: 8px;">
                     <a href="index.php?menu=rekap&filter=semua" 
                        class="btn-filter <?php echo ($filter == 'semua') ? 'active-semua' : ''; ?>">
@@ -314,6 +322,34 @@ if ($menu == 'rekap') {
     <?php endif; ?>
 
 </div>
+
+<!-- KOMPONEN PETDEV PRABOWO -->
+<div class="petdev-container" id="petDevWidget" onclick="gantiDialogPrabowo()">
+    <div class="petdev-speech" id="petSpeech">
+        Semangat bertugas! Mari layani masyarakat dengan cepat & efisien! 🇲🇨
+    </div>
+    <div class="petdev-avatar">
+        <span style="font-size: 38px;">🎖️</span>
+        <div class="petdev-badge">PetDev</div>
+    </div>
+</div>
+
+<script>
+    // Dialog interaktif PetDev Prabowo
+    const quotesPrabowo = [
+        "Semangat bertugas! Mari layani masyarakat dengan cepat & efisien! 🇲🇨",
+        "Pengelolaan administrasi surat Puskesmas Bangkingan mantap & rapi!",
+        "Jangan lupa periksa kembali nomor surat pelayanan sebelum dicetak ya!",
+        "Kerja keras dan dedikasi Anda sangat luar biasa hari ini! 🔥",
+        "Tetap solid dan jaga kualitas pelayanan kesehatan kita!"
+    ];
+    let indexQuote = 0;
+
+    function gantiDialogPrabowo() {
+        indexQuote = (indexQuote + 1) % quotesPrabowo.length;
+        document.getElementById('petSpeech').innerText = quotesPrabowo[indexQuote];
+    }
+</script>
 
 <?php if (isset($_GET['login']) && $_GET['login'] == 'success'): ?>
 <script>
