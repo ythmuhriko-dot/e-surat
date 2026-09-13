@@ -421,14 +421,14 @@ if ($menu == 'rekap') {
 
 </div>
 
-<!-- KOMPONEN WIDGET PETDEV PRABOWO (Menggunakan file lokal) -->
+<!-- KOMPONEN WIDGET PETDEV PRABOWO (GIF Waving Direct Link) -->
 <div class="petdev-wrapper" id="petDevWidget" onclick="gantiDialogPrabowo()">
     <div class="petdev-speech-bubble" id="petSpeech">
         Kerja keras dan dedikasi Anda sangat luar biasa hari ini! 🔥
     </div>
     
     <div class="petdev-avatar-box">
-        <img src="prabowo.gif" 
+        <img src="https://raw.githubusercontent.com/Codex31/codex-pets/main/pets/prabowo/waving.gif" 
              alt="PetDev Prabowo" 
              class="petdev-img">
         <div class="petdev-badge-tag">PetDev</div>
