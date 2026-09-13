@@ -421,14 +421,14 @@ if ($menu == 'rekap') {
 
 </div>
 
-<!-- KOMPONEN WIDGET PETDEV PRABOWO (Safe Base64 SVG/GIF) -->
+<!-- KOMPONEN WIDGET PETDEV PRABOWO (Base64 Pixel Art Avatar) -->
 <div class="petdev-wrapper" id="petDevWidget" onclick="gantiDialogPrabowo()">
     <div class="petdev-speech-bubble" id="petSpeech">
         Kerja keras dan dedikasi Anda sangat luar biasa hari ini! 🔥
     </div>
     
     <div class="petdev-avatar-box">
-        <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='70'>🇮🇩</text></svg>" 
+        <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='50' fill='%233b82f6'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='50'>👨‍💼</text></svg>" 
              alt="PetDev Prabowo" 
              class="petdev-img">
         <div class="petdev-badge-tag">PetDev</div>
