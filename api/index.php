@@ -520,7 +520,7 @@ if ($menu == 'rekap') {
     <div class="pet-walker-bubble" id="walkerSpeech">
         Permisi, mau lewat dulu... 🐾
     </div>
-    <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExZmVlaXpiamNiOXBnM3oxZjhod29odzRtZHQzbmR4OWNlN2EyeTF3YiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/8IIV99S5P5deIbItWO/giphy.gif" 
+    <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExYzdocm95dWFvenRtbTJzZmoyZjlyZHcxMXY0MG96MTcwbXhubjE2OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/qDOI1FqYEyTxkW0MEI/giphy.gif"
          alt="Pet Walker" 
          class="pet-walker-img">
 </div>
