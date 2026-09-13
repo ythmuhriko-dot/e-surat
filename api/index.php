@@ -292,7 +292,7 @@ if ($menu == 'rekap') {
             100% { transform: translateY(-3px) rotate(2deg); }
         }
 
-        /* HEWAN JALAN-JALAN */
+        /* HEWAN JALAN-JALAN (FIXED TRANSPARENCY & MIRROR TEXT) */
         .pet-walker-wrapper {
             position: fixed;
             bottom: 10px;
@@ -313,11 +313,12 @@ if ($menu == 'rekap') {
             border-radius: 12px;
             font-size: 11px;
             font-weight: 600;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             border: 1px solid #e2e8f0;
             margin-bottom: 6px;
             white-space: nowrap;
             position: relative;
+            transition: opacity 0.2s, transform 0.2s;
         }
 
         .pet-walker-bubble::after {
@@ -335,16 +336,16 @@ if ($menu == 'rekap') {
             width: 70px;
             height: 70px;
             object-fit: contain;
-            mix-blend-mode: screen; 
+            mix-blend-mode: lighten; /* Membersihkan background hitam pada GIF */
             animation: walkBounce 0.6s ease-in-out infinite alternate;
+            transition: transform 0.3s ease;
         }
 
+        /* Keyframes hanya untuk pergerakan kiri-kanan wrapper tanpa me-rotate wrapper */
         @keyframes walkBackAndForth {
-            0% { left: 270px; transform: scaleX(1); }
-            45% { left: calc(100vw - 120px); transform: scaleX(1); }
-            50% { left: calc(100vw - 120px); transform: scaleX(-1); }
-            95% { left: 270px; transform: scaleX(-1); }
-            100% { left: 270px; transform: scaleX(1); }
+            0% { left: 270px; }
+            50% { left: calc(100vw - 120px); }
+            100% { left: 270px; }
         }
 
         @keyframes walkBounce {
@@ -509,13 +510,14 @@ if ($menu == 'rekap') {
 
 </div>
 
-<div class="pet-walker-wrapper" onclick="suaraHewan()">
+<div class="pet-walker-wrapper" id="petWalkerWrapper" onclick="suaraHewan()">
     <div class="pet-walker-bubble" id="walkerSpeech">
         Permisi, mau lewat dulu... 🐾
     </div>
     <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExYzdocm95dWFvenRtbTJzZmoyZjlyZHcxMXY0MG96MTcwbXhubjE2OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/qDOI1FqYEyTxkW0MEI/giphy.gif"
          alt="Pet Walker" 
-         class="pet-walker-img">
+         class="pet-walker-img"
+         id="petWalkerImg">
 </div>
 
 <script>
@@ -566,6 +568,22 @@ if ($menu == 'rekap') {
             walkerSpeech.style.transform = 'translateY(0)';
         }, 150);
     }
+
+    // JS khusus untuk mengatur pembalikan gambar kucing tanpa membalikkan teks
+    const walkerImg = document.getElementById('petWalkerImg');
+    const walkerWrapper = document.getElementById('petWalkerWrapper');
+
+    setInterval(() => {
+        if (walkerWrapper && walkerImg) {
+            const rect = walkerWrapper.getBoundingClientRect();
+            // Saat jalan menuju kanan (posisi belum sampai ujung kanan)
+            if (rect.left >= window.innerWidth - 150) {
+                walkerImg.style.transform = 'scaleX(-1)';
+            } else if (rect.left <= 280) {
+                walkerImg.style.transform = 'scaleX(1)';
+            }
+        }
+    }, 200);
 </script>
 
 <?php if (isset($_GET['login']) && $_GET['login'] == 'success'): ?>
