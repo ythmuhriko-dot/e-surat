@@ -162,21 +162,100 @@ if ($menu == 'rekap') {
         table td { padding: 16px 24px; font-size: 14px; color: #334155; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
         table tr:hover td { background-color: #f8fafc; }
 
-        /* Style Tambahan untuk Tombol Filter Baru */
+        /* Style Tombol Filter */
         .btn-filter { text-decoration: none; padding: 8px 14px; font-size: 13px; font-weight: 600; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; background: #ffffff; transition: 0.2s; }
         .btn-filter:hover { background: #f1f5f9; }
         .btn-filter.active-semua { background: #334155; color: white; border-color: #334155; }
         .btn-filter.active-pelayanan { background: #2563eb; color: white; border-color: #2563eb; }
         .btn-filter.active-non { background: #d97706; color: white; border-color: #d97706; }
 
-        /* CSS PETDEV PRABOWO WIDGET */
-        .petdev-container { position: fixed; bottom: 20px; right: 25px; display: flex; flex-direction: column; align-items: flex-end; z-index: 9999; cursor: pointer; }
-        .petdev-speech { background: #ffffff; color: #1e293b; padding: 10px 14px; border-radius: 12px; font-size: 12px; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.12); border: 1px solid #cbd5e1; margin-bottom: 8px; max-width: 220px; position: relative; animation: petBounce 3s infinite alternate; }
-        .petdev-speech::after { content: ''; position: absolute; bottom: -8px; right: 25px; border-width: 8px 8px 0; border-style: solid; border-color: #ffffff transparent; display: block; width: 0; }
-        .petdev-avatar { width: 75px; height: 75px; background: #1e293b; border: 3px solid #7a151b; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: transform 0.2s ease; position: relative; }
-        .petdev-avatar:hover { transform: scale(1.1) rotate(-3deg); }
-        .petdev-badge { position: absolute; bottom: -2px; right: -2px; background: #10b981; color: white; font-size: 9px; font-weight: bold; padding: 2px 6px; border-radius: 10px; border: 1px solid white; }
-        @keyframes petBounce { 0% { transform: translateY(0); } 100% { transform: translateY(-5px); } }
+        /* STYLING PETDEV PRABOWO WIDGET */
+        .petdev-wrapper {
+            position: fixed;
+            bottom: 20px;
+            right: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            z-index: 9999;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .petdev-speech-bubble {
+            background: #ffffff;
+            color: #1e293b;
+            padding: 12px 18px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 12px;
+            max-width: 240px;
+            position: relative;
+            animation: petFloat 3s ease-in-out infinite;
+            line-height: 1.4;
+            transition: all 0.2s ease;
+        }
+
+        .petdev-speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            right: 35px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid #ffffff;
+        }
+
+        .petdev-avatar-box {
+            width: 90px;
+            height: 90px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease;
+        }
+
+        .petdev-avatar-box:hover {
+            transform: scale(1.1);
+        }
+
+        .petdev-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 8px 12px rgba(0,0,0,0.15));
+            animation: petBounce 2s ease-in-out infinite alternate;
+        }
+
+        .petdev-badge-tag {
+            position: absolute;
+            bottom: -4px;
+            right: 5px;
+            background: #10b981;
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            border: 2px solid #ffffff;
+        }
+
+        @keyframes petFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        @keyframes petBounce {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-4px) rotate(2deg); }
+        }
     </style>
 </head>
 <body>
@@ -217,7 +296,6 @@ if ($menu == 'rekap') {
         </div>
 
         <div class="table-wrapper">
-            <!-- BARIS IMPORT -->
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 24px; border-bottom: 1px solid #f1f5f9;">
                 <div class="table-title" style="padding: 0; border-bottom: none;">📋 Riwayat Sinkronisasi Log Surat</div>
                 <div style="background: #f8fafc; padding: 8px 15px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 10px;">
@@ -229,7 +307,6 @@ if ($menu == 'rekap') {
                 </div>
             </div>
 
-            <!-- BARIS TOMBOL FILTER DAN SEARCH -->
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 24px; background: #fafafa; border-bottom: 1px solid #f1f5f9;">
                 <div style="display: flex; gap: 8px;">
                     <a href="index.php?menu=rekap&filter=semua" 
@@ -246,7 +323,6 @@ if ($menu == 'rekap') {
                     </a>
                 </div>
 
-                <!-- FORM PENCARIAN -->
                 <div>
                     <form method="GET" action="index.php" style="display: inline-block;">
                         <input type="hidden" name="menu" value="rekap">
@@ -323,31 +399,43 @@ if ($menu == 'rekap') {
 
 </div>
 
-<!-- KOMPONEN PETDEV PRABOWO -->
-<div class="petdev-container" id="petDevWidget" onclick="gantiDialogPrabowo()">
-    <div class="petdev-speech" id="petSpeech">
-        Semangat bertugas! Mari layani masyarakat dengan cepat & efisien! 🇲🇨
+<div class="petdev-wrapper" id="petDevWidget" onclick="gantiDialogPrabowo()">
+    <div class="petdev-speech-bubble" id="petSpeech">
+        Kerja keras dan dedikasi Anda sangat luar biasa hari ini! 🔥
     </div>
-    <div class="petdev-avatar">
-        <span style="font-size: 38px;">🎖️</span>
-        <div class="petdev-badge">PetDev</div>
+    
+    <div class="petdev-avatar-box">
+        <img src="https://petdex.dev/pets/prabowo.gif" 
+             alt="PetDev Prabowo" 
+             class="petdev-img"
+             onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Prabowo';">
+        <div class="petdev-badge-tag">PetDev</div>
     </div>
 </div>
 
 <script>
-    // Dialog interaktif PetDev Prabowo
     const quotesPrabowo = [
-        "Semangat bertugas! Mari layani masyarakat dengan cepat & efisien! 🇲🇨",
-        "Pengelolaan administrasi surat Puskesmas Bangkingan mantap & rapi!",
-        "Jangan lupa periksa kembali nomor surat pelayanan sebelum dicetak ya!",
         "Kerja keras dan dedikasi Anda sangat luar biasa hari ini! 🔥",
-        "Tetap solid dan jaga kualitas pelayanan kesehatan kita!"
+        "Semangat bertugas! Mari layani masyarakat dengan cepat & efisien! 🇲🇨",
+        "Pengelolaan administrasi surat Puskesmas Bangkingan rapi sekali!",
+        "Jangan lupa periksa kembali nomor surat sebelum dicetak ya! 👍",
+        "Tetap solid dan tingkatkan terus kualitas pelayanan kesehatan kita!"
     ];
+
     let indexQuote = 0;
 
     function gantiDialogPrabowo() {
         indexQuote = (indexQuote + 1) % quotesPrabowo.length;
-        document.getElementById('petSpeech').innerText = quotesPrabowo[indexQuote];
+        const speechElement = document.getElementById('petSpeech');
+        
+        speechElement.style.opacity = '0';
+        speechElement.style.transform = 'translateY(5px)';
+        
+        setTimeout(() => {
+            speechElement.innerText = quotesPrabowo[indexQuote];
+            speechElement.style.opacity = '1';
+            speechElement.style.transform = 'translateY(0)';
+        }, 150);
     }
 </script>
 
