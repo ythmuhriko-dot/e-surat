@@ -285,7 +285,7 @@ if ($menu == 'rekap') {
             100% { transform: translateY(-4px) rotate(2deg); }
         }
 
-        /* STYLING HEWAN JALAN-JALAN DI BAWAH */
+        /* STYLING HEWAN JALAN-JALAN */
         .pet-walker-wrapper {
             position: fixed;
             bottom: 10px;
@@ -296,7 +296,7 @@ if ($menu == 'rekap') {
             align-items: center;
             cursor: pointer;
             user-select: none;
-            animation: walkBackAndForth 16s linear infinite;
+            animation: walkBackAndForth 25s linear infinite;
         }
 
         .pet-walker-bubble {
@@ -326,8 +326,8 @@ if ($menu == 'rekap') {
         }
 
         .pet-walker-img {
-            width: 65px;
-            height: 65px;
+            width: 70px;
+            height: 70px;
             object-fit: contain;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
             animation: walkBounce 0.6s ease-in-out infinite alternate;
@@ -503,17 +503,6 @@ if ($menu == 'rekap') {
 
 </div>
 
-<!-- WIDGET HEWAN JALAN-JALAN DI BAWAH -->
-<div class="pet-walker-wrapper" onclick="suaraHewan()">
-    <div class="pet-walker-bubble" id="walkerSpeech">
-        Permisi, mau lewat dulu... 🐾
-    </div>
-    <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdTgzeTYwbWVhcXlyYjhhZ2psdWd2N29pNDRscTlydWNldWphZ2N2dyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/VOPK1BqsMEGHK/giphy.gif" 
-         alt="Pet Walker" 
-         class="pet-walker-img">
-</div>
-
-<!-- WIDGET PETDEV PRABOWO -->
 <div class="petdev-wrapper" id="petDevWidget" onclick="gantiDialogPrabowo()">
     <div class="petdev-speech-bubble" id="petSpeech">
         Kerja keras dan dedikasi Anda sangat luar biasa hari ini! 🔥
@@ -527,8 +516,16 @@ if ($menu == 'rekap') {
     </div>
 </div>
 
+<div class="pet-walker-wrapper" onclick="suaraHewan()">
+    <div class="pet-walker-bubble" id="walkerSpeech">
+        Permisi, mau lewat dulu... 🐾
+    </div>
+    <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExZmVlaXpiamNiOXBnM3oxZjhod29odzRtZHQzbmR4OWNlN2EyeTF3YiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/8IIV99S5P5deIbItWO/giphy.gif" 
+         alt="Pet Walker" 
+         class="pet-walker-img">
+</div>
+
 <script>
-    // DIALOG PRABOWO
     const quotesPrabowo = [
         "Kerja keras dan dedikasi Anda sangat luar biasa hari ini! 🔥",
         "Semangat bertugas! Mari layani masyarakat dengan cepat & efisien! 🇲🇨",
@@ -556,9 +553,9 @@ if ($menu == 'rekap') {
     // DIALOG HEWAN JALAN-JALAN
     const dialogHewan = [
         "Permisi, mau lewat dulu... 🐾",
-        "Meow! Semangat kerjanya ya! 🐱",
+        "Semangat kerjanya ya! 🐾",
         "Patroli area Puskesmas dulu... 🕵️‍♂️",
-        "Ada camilan nggak nih? 🐟",
+        "Ada camilan nggak nih? 🍪",
         "Lanjut jalan lagi ah~ 🚶‍♂️"
     ];
 
