@@ -284,6 +284,82 @@ if ($menu == 'rekap') {
             0% { transform: translateY(0) rotate(0deg); }
             100% { transform: translateY(-4px) rotate(2deg); }
         }
+
+        /* STYLING HEWAN JALAN-JALAN DI BAWAH */
+        .pet-walker-wrapper {
+            position: fixed;
+            bottom: 10px;
+            left: 0;
+            z-index: 9998;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            animation: walkBackAndForth 16s linear infinite;
+        }
+
+        .pet-walker-bubble {
+            background: #ffffff;
+            color: #1e293b;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 6px;
+            white-space: nowrap;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .pet-walker-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid #ffffff;
+        }
+
+        .pet-walker-img {
+            width: 65px;
+            height: 65px;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
+            animation: walkBounce 0.6s ease-in-out infinite alternate;
+        }
+
+        @keyframes walkBackAndForth {
+            0% {
+                left: 10px;
+                transform: scaleX(1);
+            }
+            45% {
+                left: calc(100vw - 120px);
+                transform: scaleX(1);
+            }
+            50% {
+                left: calc(100vw - 120px);
+                transform: scaleX(-1);
+            }
+            95% {
+                left: 10px;
+                transform: scaleX(-1);
+            }
+            100% {
+                left: 10px;
+                transform: scaleX(1);
+            }
+        }
+
+        @keyframes walkBounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-5px); }
+        }
     </style>
 </head>
 <body>
@@ -427,6 +503,17 @@ if ($menu == 'rekap') {
 
 </div>
 
+<!-- WIDGET HEWAN JALAN-JALAN DI BAWAH -->
+<div class="pet-walker-wrapper" onclick="suaraHewan()">
+    <div class="pet-walker-bubble" id="walkerSpeech">
+        Permisi, mau lewat dulu... 🐾
+    </div>
+    <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdTgzeTYwbWVhcXlyYjhhZ2psdWd2N29pNDRscTlydWNldWphZ2N2dyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/VOPK1BqsMEGHK/giphy.gif" 
+         alt="Pet Walker" 
+         class="pet-walker-img">
+</div>
+
+<!-- WIDGET PETDEV PRABOWO -->
 <div class="petdev-wrapper" id="petDevWidget" onclick="gantiDialogPrabowo()">
     <div class="petdev-speech-bubble" id="petSpeech">
         Kerja keras dan dedikasi Anda sangat luar biasa hari ini! 🔥
@@ -441,6 +528,7 @@ if ($menu == 'rekap') {
 </div>
 
 <script>
+    // DIALOG PRABOWO
     const quotesPrabowo = [
         "Kerja keras dan dedikasi Anda sangat luar biasa hari ini! 🔥",
         "Semangat bertugas! Mari layani masyarakat dengan cepat & efisien! 🇲🇨",
@@ -462,6 +550,31 @@ if ($menu == 'rekap') {
             speechElement.innerText = quotesPrabowo[indexQuote];
             speechElement.style.opacity = '1';
             speechElement.style.transform = 'translateY(0)';
+        }, 150);
+    }
+
+    // DIALOG HEWAN JALAN-JALAN
+    const dialogHewan = [
+        "Permisi, mau lewat dulu... 🐾",
+        "Meow! Semangat kerjanya ya! 🐱",
+        "Patroli area Puskesmas dulu... 🕵️‍♂️",
+        "Ada camilan nggak nih? 🐟",
+        "Lanjut jalan lagi ah~ 🚶‍♂️"
+    ];
+
+    let idxHewan = 0;
+
+    function suaraHewan() {
+        idxHewan = (idxHewan + 1) % dialogHewan.length;
+        const walkerSpeech = document.getElementById('walkerSpeech');
+        
+        walkerSpeech.style.opacity = '0';
+        walkerSpeech.style.transform = 'translateY(-3px)';
+        
+        setTimeout(() => {
+            walkerSpeech.innerText = dialogHewan[idxHewan];
+            walkerSpeech.style.opacity = '1';
+            walkerSpeech.style.transform = 'translateY(0)';
         }, 150);
     }
 </script>
