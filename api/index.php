@@ -154,7 +154,6 @@ if ($menu == 'rekap') {
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
         body { display: flex; height: 100vh; background: #f4f7f6; color: #334155; }
         
-        /* SIDEBAR DIPERBARUI (FLEXBOX VERTIKAL) */
         .sidebar { 
             width: 260px; 
             background: #36454F; 
@@ -164,9 +163,6 @@ if ($menu == 'rekap') {
             height: 100vh; 
             position: sticky; 
             top: 0; 
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
         }
 
         .sidebar h2 { font-size: 18px; margin-bottom: 20px; border-bottom: 1px solid #a83d42; padding-bottom: 10px; }
@@ -203,125 +199,77 @@ if ($menu == 'rekap') {
         .btn-filter.active-pelayanan { background: #2563eb; color: white; border-color: #2563eb; }
         .btn-filter.active-non { background: #d97706; color: white; border-color: #d97706; }
 
-        /* STYLING PETDEV PRABOWO DI DALAM SIDEBAR */
-        .petdev-wrapper {
-            margin-top: 15px;
+        /* WIDGET KONTROL POJOK KANAN */
+        .right-widget-controls {
+            position: fixed;
+            top: 20px;
+            right: 25px;
+            z-index: 9999;
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            gap: 10px;
+        }
+
+        .widget-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
             cursor: pointer;
-            user-select: none;
-            width: 100%;
-            border-top: 1px solid #4a5d6b;
-            padding-top: 15px;
-        }
-
-        .petdev-speech-bubble {
-            background: #ffffff;
-            color: #1e293b;
-            padding: 10px 12px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            border: 1px solid #e2e8f0;
-            margin-bottom: 10px;
-            width: 100%;
-            position: relative;
-            animation: petFloat 3s ease-in-out infinite;
-            line-height: 1.3;
-            text-align: center;
-        }
-
-        .petdev-speech-bubble::after {
-            content: '';
-            position: absolute;
-            bottom: -6px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 6px solid transparent;
-            border-right: 6px solid transparent;
-            border-top: 6px solid #ffffff;
-        }
-
-        .petdev-avatar-box {
-            width: 75px;
-            height: 75px;
-            position: relative;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.2s ease;
+            transition: transform 0.2s, background-color 0.2s;
         }
 
-        .petdev-avatar-box:hover {
-            transform: scale(1.08);
+        .widget-btn:hover {
+            transform: scale(1.1);
         }
 
-        .petdev-img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
-            animation: petBounce 2s ease-in-out infinite alternate;
-        }
+        .btn-add { background: #ff7700; }
+        .btn-destroy { background: #ef4444; display: none; }
 
-        .petdev-badge-tag {
-            position: absolute;
-            bottom: -2px;
-            right: 0px;
-            background: #10b981;
-            color: white;
-            font-size: 9px;
-            font-weight: 700;
-            padding: 2px 6px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-            border: 1.5px solid #ffffff;
-        }
-
-        @keyframes petFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-4px); }
-        }
-
-        @keyframes petBounce {
-            0% { transform: translateY(0) rotate(0deg); }
-            100% { transform: translateY(-3px) rotate(2deg); }
-        }
-
-        /* HEWAN JALAN-JALAN (FIXED TRANSPARENCY & MIRROR TEXT) */
-        .pet-walker-wrapper {
+        /* CONTAINER TEMPAT KARAKTER YANG DI-SPAWN */
+        #narutoContainer {
             position: fixed;
-            bottom: 10px;
-            left: 0;
-            z-index: 9998;
+            bottom: 20px;
+            right: 30px;
+            z-index: 9997;
+            display: flex;
+            flex-direction: row-reverse;
+            gap: 20px;
+            align-items: flex-end;
+            pointer-events: none;
+        }
+
+        .spawned-char-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            cursor: pointer;
-            user-select: none;
-            animation: walkBackAndForth 25s linear infinite;
+            pointer-events: auto;
+            animation: popIn 0.3s ease-out;
         }
 
-        .pet-walker-bubble {
+        .spawned-speech-bubble {
             background: #ffffff;
             color: #1e293b;
-            padding: 6px 12px;
+            padding: 8px 14px;
             border-radius: 12px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             border: 1px solid #e2e8f0;
-            margin-bottom: 6px;
-            white-space: nowrap;
+            margin-bottom: 8px;
+            max-width: 180px;
+            text-align: center;
             position: relative;
-            transition: opacity 0.2s, transform 0.2s;
+            word-wrap: break-word;
         }
 
-        .pet-walker-bubble::after {
+        .spawned-speech-bubble::after {
             content: '';
             position: absolute;
             bottom: -6px;
@@ -332,57 +280,94 @@ if ($menu == 'rekap') {
             border-top: 6px solid #ffffff;
         }
 
-        .pet-walker-img {
-           width: 70px;
-    height: 70px;
-    object-fit: contain;
-    /* Hapus mix-blend-mode, filter, dan mask-image agar tidak mengganggu GIF transparan */
-    animation: walkBounce 0.6s ease-in-out infinite alternate;
-    transition: transform 0.3s ease;
+        .spawned-char-img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
+            animation: charBounce 0.8s ease-in-out infinite alternate;
         }
 
-        /* Keyframes hanya untuk pergerakan kiri-kanan wrapper tanpa me-rotate wrapper */
-        @keyframes walkBackAndForth {
-            0% { left: 270px; }
-            50% { left: calc(100vw - 120px); }
-            100% { left: 270px; }
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
-        @keyframes walkBounce {
+        @keyframes charBounce {
             0% { transform: translateY(0); }
             100% { transform: translateY(-5px); }
         }
+
+        /* MODAL DIALOG */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.4);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-card {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            width: 320px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .modal-card h4 {
+            font-size: 16px;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+
+        .modal-card textarea {
+            width: 100%;
+            height: 80px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            font-size: 13px;
+            resize: none;
+            outline: none;
+            margin-bottom: 15px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-modal {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-modal-cancel { background: #e2e8f0; color: #475569; }
+        .btn-modal-submit { background: #ff7700; color: white; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <div>
-        <h2>E-Surat Bangkingan</h2>
-        <a href="index.php" class="menu-item <?php echo $menu == '' ? 'active' : ''; ?>">🏠 Dashboard</a>
-        <a href="index.php?menu=rekap" class="menu-item <?php echo $menu == 'rekap' ? 'active' : ''; ?>">📊 Rekap & Statistik</a>
-        <hr style="border:0; border-top:1px solid #a83d42; margin: 15px 0;">
-        <p style="padding: 6px 10px; font-size: 14px; font-weight: 600; color: #cbd5e1;">SURAT PELAYANAN</p>
-        <a href="form_sakit.php" class="menu-item">🛏️ Surat Sakit</a>
-        <a href="form_sehat.php" class="menu-item">📧 Surat Sehat</a>
-        <a href="form_kematian.php" class="menu-item">🪦 Surat Kematian</a>
-        <p style="padding: 6px 10px; font-size: 14px; font-weight: 600; color: #cbd5e1; margin-top: 10px;">NON PELAYANAN</p>
-        <a href="form_non_pelayanan.php" class="menu-item">📝 Input Agenda</a>
-        <a href="logout.php" class="menu-item logout-btn">🚪 Keluar / Logout</a>
-    </div>
-
-    <div class="petdev-wrapper" id="petDevWidget" onclick="gantiDialogPrabowo()">
-        <div class="petdev-speech-bubble" id="petSpeech">
-            Kerja keras dan dedikasi Anda sangat luar biasa hari ini! 🔥
-        </div>
-        
-        <div class="petdev-avatar-box">
-            <img src="/prabowo.gif" 
-                 alt="PetDev Prabowo" 
-                 class="petdev-img">
-            <div class="petdev-badge-tag">PetDev</div>
-        </div>
-    </div>
+    <h2>E-Surat Bangkingan</h2>
+    <a href="index.php" class="menu-item <?php echo $menu == '' ? 'active' : ''; ?>">🏠 Dashboard</a>
+    <a href="index.php?menu=rekap" class="menu-item <?php echo $menu == 'rekap' ? 'active' : ''; ?>">📊 Rekap & Statistik</a>
+    <hr style="border:0; border-top:1px solid #a83d42; margin: 15px 0;">
+    <p style="padding: 6px 10px; font-size: 14px; font-weight: 600; color: #cbd5e1;">SURAT PELAYANAN</p>
+    <a href="form_sakit.php" class="menu-item">🛏️ Surat Sakit</a>
+    <a href="form_sehat.php" class="menu-item">📧 Surat Sehat</a>
+    <a href="form_kematian.php" class="menu-item">🪦 Surat Kematian</a>
+    <p style="padding: 6px 10px; font-size: 14px; font-weight: 600; color: #cbd5e1; margin-top: 10px;">NON PELAYANAN</p>
+    <a href="form_non_pelayanan.php" class="menu-item">📝 Input Agenda</a>
+    <a href="logout.php" class="menu-item logout-btn">🚪 Keluar / Logout</a>
 </div>
 
 <div class="main-content">
@@ -510,80 +495,87 @@ if ($menu == 'rekap') {
 
 </div>
 
-<div class="pet-walker-wrapper" id="petWalkerWrapper" onclick="suaraHewan()">
-    <div class="pet-walker-bubble" id="walkerSpeech">
-        Permisi, mau lewat dulu... 🐾
+<!-- KONTROL POJOK KANAN (TOMBOL + & DESTROY) -->
+<div class="right-widget-controls">
+    <button class="widget-btn btn-destroy" id="btnDestroy" onclick="destroyAllCharacters()" title="Destroy All">💥</button>
+    <button class="widget-btn btn-add" onclick="openInputModal()" title="Tambah Karakter Naruto">+</button>
+</div>
+
+<!-- CONTAINER KARAKTER YANG DICETAK -->
+<div id="narutoContainer"></div>
+
+<!-- MODAL INPUT KALIMAT -->
+<div class="modal-overlay" id="inputModal">
+    <div class="modal-card">
+        <h4>Panggil Karakter Naruto 🍃</h4>
+        <textarea id="narutoText" placeholder="Ketik kalimat dialog karakter di sini..."></textarea>
+        <div class="modal-actions">
+            <button class="btn-modal btn-modal-cancel" onclick="closeInputModal()">Batal</button>
+            <button class="btn-modal btn-modal-submit" onclick="spawnCharacter()">Kirim Dattebayo!</button>
+        </div>
     </div>
-    <img src="kicaumania.gif"
-         alt="Pet Walker" 
-         class="pet-walker-img"
-         id="petWalkerImg">
 </div>
 
 <script>
-    const quotesPrabowo = [
-        "Kerja keras dan dedikasi Anda sangat luar biasa hari ini! 🔥",
-        "Semangat bertugas! Mari layani masyarakat dengan cepat & efisien! 🇲🇨",
-        "Pengelolaan administrasi surat Puskesmas Bangkingan rapi sekali!",
-        "Jangan lupa periksa kembali nomor surat sebelum dicetak ya! 👍",
-        "Tetap solid dan tingkatkan terus kualitas pelayanan kesehatan kita!"
+    // --------------------------------------------------------------------------
+    // LOGIKA KARAKTER NARUTO (PLUS BUTTON, SPAWN SASUKE/NARUTO, DESTROY)
+    // --------------------------------------------------------------------------
+    const narutoCharacters = [
+        { name: 'Naruto', img: '/naruto.gif' },
+        { name: 'Sasuke', img: '/sasuke.gif' },
+        { name: 'Kakashi', img: '/kakashi.gif' },
+        { name: 'Sakura', img: '/sakura.gif' }
     ];
 
-    let indexQuote = 0;
+    let charIndex = 0;
 
-    function gantiDialogPrabowo() {
-        indexQuote = (indexQuote + 1) % quotesPrabowo.length;
-        const speechElement = document.getElementById('petSpeech');
-        
-        speechElement.style.opacity = '0';
-        speechElement.style.transform = 'translateY(3px)';
-        
-        setTimeout(() => {
-            speechElement.innerText = quotesPrabowo[indexQuote];
-            speechElement.style.opacity = '1';
-            speechElement.style.transform = 'translateY(0)';
-        }, 150);
+    function openInputModal() {
+        document.getElementById('inputModal').style.display = 'flex';
+        document.getElementById('narutoText').focus();
     }
 
-    const dialogHewan = [
-        "Permisi, mau lewat dulu... 🐾",
-        "Semangat kerjanya ya! 🐾",
-        "Patroli area Puskesmas dulu... 🕵️‍♂️",
-        "Ada camilan nggak nih? 🍪",
-        "Lanjut jalan lagi ah~ 🚶‍♂️"
-    ];
-
-    let idxHewan = 0;
-
-    function suaraHewan() {
-        idxHewan = (idxHewan + 1) % dialogHewan.length;
-        const walkerSpeech = document.getElementById('walkerSpeech');
-        
-        walkerSpeech.style.opacity = '0';
-        walkerSpeech.style.transform = 'translateY(-3px)';
-        
-        setTimeout(() => {
-            walkerSpeech.innerText = dialogHewan[idxHewan];
-            walkerSpeech.style.opacity = '1';
-            walkerSpeech.style.transform = 'translateY(0)';
-        }, 150);
+    function closeInputModal() {
+        document.getElementById('inputModal').style.display = 'none';
+        document.getElementById('narutoText').value = '';
     }
 
-    // JS khusus untuk mengatur pembalikan gambar kucing tanpa membalikkan teks
-    const walkerImg = document.getElementById('petWalkerImg');
-    const walkerWrapper = document.getElementById('petWalkerWrapper');
+    function spawnCharacter() {
+        const textInput = document.getElementById('narutoText').value.trim();
+        if (!textInput) return;
 
-    setInterval(() => {
-        if (walkerWrapper && walkerImg) {
-            const rect = walkerWrapper.getBoundingClientRect();
-            // Saat jalan menuju kanan (posisi belum sampai ujung kanan)
-            if (rect.left >= window.innerWidth - 150) {
-                walkerImg.style.transform = 'scaleX(-1)';
-            } else if (rect.left <= 280) {
-                walkerImg.style.transform = 'scaleX(1)';
-            }
-        }
-    }, 200);
+        const currentChar = narutoCharacters[charIndex];
+        
+        const charWrapper = document.createElement('div');
+        charWrapper.className = 'spawned-char-item';
+        
+        charWrapper.innerHTML = `
+            <div class="spawned-speech-bubble">${escapeHtml(textInput)}</div>
+            <img src="${currentChar.img}" alt="${currentChar.name}" class="spawned-char-img" onerror="this.src='/logo_surabaya.png'">
+        `;
+
+        document.getElementById('narutoContainer').appendChild(charWrapper);
+
+        charIndex = (charIndex + 1) % narutoCharacters.length;
+        document.getElementById('btnDestroy').style.display = 'flex';
+
+        closeInputModal();
+    }
+
+    function destroyAllCharacters() {
+        const container = document.getElementById('narutoContainer');
+        container.innerHTML = '';
+        document.getElementById('btnDestroy').style.display = 'none';
+        charIndex = 0;
+    }
+
+    function escapeHtml(text) {
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
 </script>
 
 <?php if (isset($_GET['login']) && $_GET['login'] == 'success'): ?>
