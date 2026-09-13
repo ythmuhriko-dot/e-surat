@@ -336,7 +336,9 @@ if ($menu == 'rekap') {
             width: 70px;
             height: 70px;
             object-fit: contain;
-            mix-blend-mode: lighten; /* Membersihkan background hitam pada GIF */
+            /* Efek untuk menghilangkan warna hitam pada GIF background gelap */
+            filter: drop-shadow(0px 0px 1px rgba(0,0,0,0.5));
+            mask-image: radial-gradient(circle, black 60%, transparent 100%); 
             animation: walkBounce 0.6s ease-in-out infinite alternate;
             transition: transform 0.3s ease;
         }
