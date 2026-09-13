@@ -333,14 +333,12 @@ if ($menu == 'rekap') {
         }
 
         .pet-walker-img {
-            width: 70px;
-            height: 70px;
-            object-fit: contain;
-            /* Efek untuk menghilangkan warna hitam pada GIF background gelap */
-            filter: drop-shadow(0px 0px 1px rgba(0,0,0,0.5));
-            mask-image: radial-gradient(circle, black 60%, transparent 100%); 
-            animation: walkBounce 0.6s ease-in-out infinite alternate;
-            transition: transform 0.3s ease;
+           width: 70px;
+    height: 70px;
+    object-fit: contain;
+    /* Hapus mix-blend-mode, filter, dan mask-image agar tidak mengganggu GIF transparan */
+    animation: walkBounce 0.6s ease-in-out infinite alternate;
+    transition: transform 0.3s ease;
         }
 
         /* Keyframes hanya untuk pergerakan kiri-kanan wrapper tanpa me-rotate wrapper */
@@ -516,7 +514,7 @@ if ($menu == 'rekap') {
     <div class="pet-walker-bubble" id="walkerSpeech">
         Permisi, mau lewat dulu... 🐾
     </div>
-    <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExYzdocm95dWFvenRtbTJzZmoyZjlyZHcxMXY0MG96MTcwbXhubjE2OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/qDOI1FqYEyTxkW0MEI/giphy.gif"
+    <img src="kicaumania.gif"
          alt="Pet Walker" 
          class="pet-walker-img"
          id="petWalkerImg">
