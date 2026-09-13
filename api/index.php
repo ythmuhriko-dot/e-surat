@@ -8,6 +8,28 @@ $requested_file = basename($request_uri);
 if (!empty($requested_file) && $requested_file !== 'index.php') {
     $target_file = __DIR__ . '/' . $requested_file;
     if (file_exists($target_file) && is_file($target_file)) {
+        $ext = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+        
+        // Tentukan MIME Type untuk aset statis/gambar
+        $mime_types = [
+            'gif'  => 'image/gif',
+            'png'  => 'image/png',
+            'jpg'  => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'svg'  => 'image/svg+xml',
+            'ico'  => 'image/x-icon',
+            'css'  => 'text/css',
+            'js'   => 'application/javascript'
+        ];
+
+        // Jika file yang diminta adalah gambar/aset, kirim header lalu tampilkan isinya
+        if (array_key_exists($ext, $mime_types)) {
+            header('Content-Type: ' . $mime_types[$ext]);
+            readfile($target_file);
+            exit();
+        }
+
+        // Jika file PHP biasa
         require $target_file;
         exit();
     }
@@ -406,7 +428,6 @@ if ($menu == 'rekap') {
     </div>
     
     <div class="petdev-avatar-box">
-        <!-- Menggunakan gambar lokal prabowo.gif (atau ubah ke prabowo.png jika ekstensinya PNG) -->
         <img src="prabowo.gif" 
              alt="PetDev Prabowo" 
              class="petdev-img">
