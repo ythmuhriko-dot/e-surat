@@ -38,7 +38,7 @@ if (!empty($requested_file) && $requested_file !== 'index.php') {
 }
 
 // ==============================================================================
-// 2. LOGIKA DASHBOARD & REKAP (INDEX.PHP)
+// 2. LOGIKA DASHBOARD, REKAP & API WIDGET (INDEX.PHP)
 // ==============================================================================
 
 ob_start();
@@ -57,6 +57,72 @@ if (!isset($_SESSION['login']) && !empty($_COOKIE['user_login'])) {
 if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
     header("Location: login.php");
     exit();
+}
+
+// ------------------------------------------------------------------------------
+// ENDPOINT API AJAX UNTUK PERSISTENSI WIDGET & PEMBERSIHAN OTOMATIS 3 JAM
+// ------------------------------------------------------------------------------
+
+// Hapus otomatis karakter yang umurnya sudah lebih dari 3 jam
+try {
+    $koneksi->exec("DELETE FROM naruto_widgets WHERE created_at < NOW() - INTERVAL '3 hours'");
+} catch (Exception $e) {
+    // Abaikan jika tabel belum terbuat
+}
+
+if (isset($_GET['action'])) {
+    header('Content-Type: application/json');
+    $action = $_GET['action'];
+
+    // Ambil semua widget yang aktif
+    if ($action == 'get_widgets') {
+        $stmt = $koneksi->query("SELECT * FROM naruto_widgets ORDER BY id ASC");
+        echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+        exit();
+    }
+
+    // Simpan widget baru ke DB
+    if ($action == 'save_widget' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $input = json_decode(file_get_contents('php://input'), true);
+        if ($input) {
+            $stmt = $koneksi->prepare("INSERT INTO naruto_widgets (character_name, img_url, dialog_text, pos_x, speed, direction) VALUES (:name, :img, :text, :pos_x, :speed, :dir) RETURNING id");
+            $stmt->execute([
+                ':name'  => $input['name'],
+                ':img'   => $input['img'],
+                ':text'  => $input['text'],
+                ':pos_x' => $input['pos_x'],
+                ':speed' => $input['speed'],
+                ':dir'   => $input['direction']
+            ]);
+            $inserted = $stmt->fetch(PDO::FETCH_ASSOC);
+            echo json_encode(['status' => 'success', 'id' => $inserted['id']]);
+        }
+        exit();
+    }
+
+    // Update posisi terbaru saat patroli
+    if ($action == 'update_positions' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $input = json_decode(file_get_contents('php://input'), true);
+        if (is_array($input)) {
+            $stmt = $koneksi->prepare("UPDATE naruto_widgets SET pos_x = :pos_x, direction = :dir WHERE id = :id");
+            foreach ($input as $w) {
+                $stmt->execute([
+                    ':pos_x' => $w['pos_x'],
+                    ':dir'   => $w['direction'],
+                    ':id'    => $w['id']
+                ]);
+            }
+        }
+        echo json_encode(['status' => 'success']);
+        exit();
+    }
+
+    // Hapus semua widget (Destroy All)
+    if ($action == 'destroy_all') {
+        $koneksi->exec("DELETE FROM naruto_widgets");
+        echo json_encode(['status' => 'success']);
+        exit();
+    }
 }
 
 $menu = isset($_GET['menu']) ? $_GET['menu'] : '';
@@ -523,7 +589,7 @@ if ($menu == 'rekap') {
 
 <script>
     // --------------------------------------------------------------------------
-    // LOGIKA KARAKTER NARUTO (WALKING PATROL & ANTI-DUPLICATE QUEUE)
+    // LOGIKA KARAKTER NARUTO (DATABASE PERSISTENT WALKING PATROL)
     // --------------------------------------------------------------------------
     const narutoCharacters = [
         { name: 'Naruto', img: '/naruto.gif' },
@@ -541,7 +607,6 @@ if ($menu == 'rekap') {
     let activeWalkers = [];
     let animationFrameId = null;
 
-    // SISTEM ANTREAN UNTUK MENCEGAH KARAKTER DOBEL BERURUTAN
     function getNextCharacter() {
         if (charQueue.length === 0) {
             charQueue = [...narutoCharacters];
@@ -563,6 +628,30 @@ if ($menu == 'rekap') {
         document.getElementById('narutoText').value = '';
     }
 
+    // LOAD WIDGET SAAT HALAMAN DIBUKA (PERSISTENSI COMPUTE/KOMPUTER LAIN)
+    window.addEventListener('DOMContentLoaded', () => {
+        loadWidgetsFromDB();
+        // Autosave posisi ke DB setiap 5 detik
+        setInterval(syncPositionsToDB, 5000);
+    });
+
+    function loadWidgetsFromDB() {
+        fetch('index.php?action=get_widgets')
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data) && data.length > 0) {
+                    data.forEach(item => {
+                        createWalkerElement(item.id, item.character_name, item.img_url, item.dialog_text, parseFloat(item.pos_x), parseFloat(item.speed), parseInt(item.direction));
+                    });
+                    document.getElementById('btnDestroy').style.display = 'flex';
+                    if (!animationFrameId) {
+                        animationFrameId = requestAnimationFrame(updateWalkers);
+                    }
+                }
+            })
+            .catch(err => console.error(err));
+    }
+
     function spawnCharacter() {
         const textInput = document.getElementById('narutoText').value.trim();
         if (!textInput) return;
@@ -571,45 +660,63 @@ if ($menu == 'rekap') {
         const containerWidth = container.clientWidth || (window.innerWidth - 290);
         
         const nextChar = getNextCharacter();
-        
+        const initialPosX = Math.random() * Math.max(0, containerWidth - 100);
+        const speed = 1 + Math.random() * 1.5;
+        const direction = Math.random() > 0.5 ? 1 : -1;
+
+        // Simpan ke Database via AJAX
+        fetch('index.php?action=save_widget', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: nextChar.name,
+                img: nextChar.img,
+                text: textInput,
+                pos_x: initialPosX,
+                speed: speed,
+                direction: direction
+            })
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res.status === 'success') {
+                createWalkerElement(res.id, nextChar.name, nextChar.img, textInput, initialPosX, speed, direction);
+                closeInputModal();
+                if (!animationFrameId) {
+                    animationFrameId = requestAnimationFrame(updateWalkers);
+                }
+            }
+        });
+    }
+
+    function createWalkerElement(id, name, img, text, posX, speed, direction) {
+        const container = document.getElementById('narutoContainer');
         const charWrapper = document.createElement('div');
         charWrapper.className = 'spawned-char-item';
         
         charWrapper.innerHTML = `
-            <div class="spawned-speech-bubble">${escapeHtml(textInput)}</div>
-            <img src="${nextChar.img}" alt="${nextChar.name}" class="spawned-char-img" onerror="this.src='/logo_surabaya.png'">
+            <div class="spawned-speech-bubble">${escapeHtml(text)}</div>
+            <img src="${img}" alt="${name}" class="spawned-char-img" onerror="this.src='/logo_surabaya.png'">
         `;
 
         container.appendChild(charWrapper);
 
-        // INISIALISASI POSISI & KECEPATAN JALAN
-        const initialPosX = Math.random() * Math.max(0, containerWidth - 100);
-        const speed = 1 + Math.random() * 1.5; // Kecepatan acak antara 1px - 2.5px per frame
-        const direction = Math.random() > 0.5 ? 1 : -1; // 1 = ke kanan, -1 = ke kiri
-
         const walkerObj = {
+            id: id,
             element: charWrapper,
-            posX: initialPosX,
+            posX: posX,
             speed: speed,
             direction: direction
         };
 
-        // Karena GIF bawaan menghadap kiri, jika jalan ke kanan (1), balik gambarnya dengan class face-right
         if (direction === 1) {
             charWrapper.classList.add('face-right');
         }
 
         activeWalkers.push(walkerObj);
-
         document.getElementById('btnDestroy').style.display = 'flex';
-        closeInputModal();
-
-        if (!animationFrameId) {
-            animationFrameId = requestAnimationFrame(updateWalkers);
-        }
     }
 
-    // ANIMASI PATROLI BERJALAN BOLAK-BALIK
     function updateWalkers() {
         const container = document.getElementById('narutoContainer');
         const containerWidth = container.clientWidth || (window.innerWidth - 290);
@@ -620,14 +727,11 @@ if ($menu == 'rekap') {
 
             walker.posX += walker.speed * walker.direction;
 
-            // Nabrak batas kanan -> balik jalan ke kiri (hapus flip horizontal)
             if (walker.posX >= maxRight) {
                 walker.posX = maxRight;
                 walker.direction = -1;
                 walker.element.classList.remove('face-right');
-            } 
-            // Nabrak batas kiri -> balik jalan ke kanan (tambah flip horizontal)
-            else if (walker.posX <= 0) {
+            } else if (walker.posX <= 0) {
                 walker.posX = 0;
                 walker.direction = 1;
                 walker.element.classList.add('face-right');
@@ -643,15 +747,36 @@ if ($menu == 'rekap') {
         }
     }
 
+    function syncPositionsToDB() {
+        if (activeWalkers.length === 0) return;
+        const payload = activeWalkers.map(w => ({
+            id: w.id,
+            pos_x: w.posX,
+            direction: w.direction
+        }));
+
+        fetch('index.php?action=update_positions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+    }
+
     function destroyAllCharacters() {
-        const container = document.getElementById('narutoContainer');
-        container.innerHTML = '';
-        activeWalkers = [];
-        if (animationFrameId) {
-            cancelAnimationFrame(animationFrameId);
-            animationFrameId = null;
-        }
-        document.getElementById('btnDestroy').style.display = 'none';
+        fetch('index.php?action=destroy_all')
+            .then(res => res.json())
+            .then(res => {
+                if (res.status === 'success') {
+                    const container = document.getElementById('narutoContainer');
+                    container.innerHTML = '';
+                    activeWalkers = [];
+                    if (animationFrameId) {
+                        cancelAnimationFrame(animationFrameId);
+                        animationFrameId = null;
+                    }
+                    document.getElementById('btnDestroy').style.display = 'none';
+                }
+            });
     }
 
     function escapeHtml(text) {
